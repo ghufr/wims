@@ -10,7 +10,9 @@ const Table = ({
   columns = [],
   data = [],
   selectableRows = false,
+  selectedRows = [],
   onSelectedRowsChange,
+  onSelectAll,
   rowEdit,
   rowDelete,
 }) => {
@@ -18,7 +20,19 @@ const Table = ({
     <table className="bg-white rounded-lg text-left table-auto w-full">
       <thead className="font-medium text-gray-700 border-b">
         <tr>
-          {selectableRows && <th></th>}
+          {selectableRows && (
+            <th className="p-1 text-center">
+              <Checkbox
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    onSelectAll(data.map((item) => item.id));
+                  } else {
+                    onSelectAll([]);
+                  }
+                }}
+              />
+            </th>
+          )}
           {columns.map((column, i) => (
             <th key={i} className="p-2">
               {column.name}
@@ -36,6 +50,7 @@ const Table = ({
                   name={i}
                   id={"check-" + i}
                   value={row.id}
+                  checked={selectedRows.indexOf(row.id) > -1}
                   onChange={() => onSelectedRowsChange(row)}
                 />
               </td>

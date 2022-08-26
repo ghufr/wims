@@ -136,7 +136,12 @@ const ProductCreate = ({ product = {} }) => {
                 name="type"
                 id="type"
                 required
-                options={[{ value: "Frozen", label: "Frozen" }]}
+                options={[
+                  { value: "Meat", label: "Meat" },
+                  { value: "Fishery", label: "Fishery" },
+                  { value: "Vegetable", label: "Vegetable" },
+                  { value: "Beverage", label: "Beverage" },
+                ]}
               ></Select>
             </div>
           </div>

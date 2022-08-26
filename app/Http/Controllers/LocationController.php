@@ -37,7 +37,9 @@ class LocationController extends Controller
 
   public function show($id)
   {
-    //
+    return Inertia::render('Master/Vendors/Create', [
+      "vendor" => Location::where("id", $id)->first()
+    ]);
   }
 
   public function update(Request $request, $id)

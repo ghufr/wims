@@ -7,8 +7,8 @@ import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
 
-const ProductIndex = ({ products }) => {
-  const { select, isSelected, onSelectChange } = useSelect([]);
+const ProductIndex = ({ products, can = {} }) => {
+  const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
   const columns = [
     {
       name: "Name",
@@ -54,9 +54,11 @@ const ProductIndex = ({ products }) => {
     <div>
       <div className="mb-4">
         <div className="flex space-x-3 items-center text-gray-500">
-          <Link href={route("master.products.create")}>
-            <Button>Create Product</Button>
-          </Link>
+          {can.create && (
+            <Link href={route("master.products.create")}>
+              <Button>Create Product</Button>
+            </Link>
+          )}
           {isSelected && (
             <Button outline onClick={() => handleMassDelete(select)}>
               Delete Selected ({select.length})
@@ -70,6 +72,8 @@ const ProductIndex = ({ products }) => {
         data={products}
         selectableRows
         onSelectedRowsChange={(item) => onSelectChange(item.id)}
+        onSelectAll={setSelect}
+        selectedRows={select}
         rowEdit={(row) => route("master.products.show", { id: row.id })}
         rowDelete={(row) => handleDelete(row.id)}
       />

@@ -151,7 +151,7 @@ const VendorCreate = ({ vendor = {} }) => {
             </div>
           </div>
         </div>
-        <div className="text-right">
+        <div className="justify-end space-x-2 flex">
           <Button
             outline
             type="button"

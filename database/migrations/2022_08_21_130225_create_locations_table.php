@@ -21,6 +21,7 @@ return new class extends Migration
       $table->string('name')->unique();
       $table->string('section');
       $table->string('type');
+      $table->foreignIdFor(Warehouse::class);
       $table->timestamps();
     });
   }

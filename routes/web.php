@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InboundController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\OrderDeliveryController;
+use App\Http\Controllers\OutboundController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
@@ -20,20 +23,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
 
 
-// Route::group('inbound', function() {
-//   Route::get('delivery', )
-// });
+Route::prefix('inbound')->name('inbound.')->middleware(['auth'])->group(function () {
+  Route::resource('delivery', InboundController::class);
+  Route::resource('receipt', Receipt::class);
+});
 
-// Route::group('outbound', function() {
+Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(function () {
+  Route::resource('delivery', OutboundController::class);
+  Route::resource('order', OrderDeliveryController::class);
+});
 
-// });
 
 
-
-Route::prefix('master')->name('master.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('master')->name('master.')->middleware(['auth'])->group(function () {
   Route::resources(
     [
       'products' => ProductController::class,

@@ -30,7 +30,7 @@ class UserController extends Controller
     $request->validate([
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users',
-      'password' => ['required', 'confirmed', Rules\Password::defaults()],
+      'password' => ['required', Rules\Password::defaults()],
     ]);
 
     $user = User::create([
@@ -49,32 +49,36 @@ class UserController extends Controller
   public function show($id)
   {
     return Inertia::render('Master/Users/Create', [
-      "user" => User::where("id", $id)->first()
+      "user" => User::where("id", $id)->first()->makeHidden(['password'])
     ]);
   }
 
   public function update(Request $request, User $user)
   {
+
     $request->validate([
       'name' => 'required|string|max:255',
-      'email' => 'required|string|email|max:255|unique:users',
-      'password' => ['required', 'confirmed', Rules\Password::defaults()],
+      'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+      // 'permissions'
     ]);
+
+    // 'edit article, create user, edit user'
+
+    // $user->givePermissionTo('');
 
     $user->update([
       'name' => $request->name,
       'email' => $request->email,
-      'password' => Hash::make($request->password),
-      'role' => ''
+      'password' => $request->password ? Hash::make($request->password) : $user->password,
     ]);
 
-    return Redirect::route('master.products.index');
+    return Redirect::route('master.users.index');
   }
 
   public function destroy($id)
   {
     $ids = explode(',', $id);
     User::whereIn('id', $ids)->delete();
-    return Redirect::route('master.products.index');
+    return Redirect::route('master.users.index');
   }
 }

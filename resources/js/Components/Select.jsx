@@ -11,7 +11,7 @@ function Select({
 }) {
   return (
     <select
-      className={`border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm ${
+      className={`appearance-none border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm ${
         className || ""
       }`}
       name={name}

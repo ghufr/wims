@@ -8,7 +8,7 @@ import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
 
 const WarehouseIndex = ({ warehouses }) => {
-  const { select, isSelected, onSelectChange } = useSelect([]);
+  const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
   const columns = [
     {
       name: "Name",
@@ -74,6 +74,8 @@ const WarehouseIndex = ({ warehouses }) => {
         data={warehouses}
         selectableRows
         onSelectedRowsChange={(item) => onSelectChange(item.id)}
+        onSelectAll={setSelect}
+        selectedRows={select}
         rowEdit={(row) => route("master.warehouses.show", { id: row.id })}
         rowDelete={(row) => handleDelete(row.id)}
       />

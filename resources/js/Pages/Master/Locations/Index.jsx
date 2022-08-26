@@ -8,7 +8,7 @@ import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
 
 const LocationIndex = ({ locations }) => {
-  const { select, isSelected, onSelectChange } = useSelect([]);
+  const { select, setSelect, isSelected, onSelectChange } = useSelect([]);
   const columns = [
     {
       name: "Name",
@@ -66,6 +66,8 @@ const LocationIndex = ({ locations }) => {
         data={locations}
         selectableRows
         onSelectedRowsChange={(item) => onSelectChange(item.id)}
+        onSelectAll={setSelect}
+        selectedRows={select}
         rowEdit={(row) => route("master.locations.show", { id: row.id })}
         rowDelete={(row) => handleDelete(row.id)}
       />

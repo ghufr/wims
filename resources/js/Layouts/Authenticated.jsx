@@ -70,11 +70,11 @@ export default function Authenticated({
       children: [
         {
           name: "Inbound Delivery",
-          href: "",
+          href: "inbound.delivery",
         },
         {
           name: "Good Receiving",
-          href: "",
+          href: "inbound.receipt",
         },
       ],
     },
@@ -84,11 +84,11 @@ export default function Authenticated({
       children: [
         {
           name: "Outbound Delivery",
-          href: "",
+          href: "outbound.delivery",
         },
         {
           name: "Delivery Order",
-          href: "",
+          href: "outbound.order",
         },
       ],
     },
@@ -141,7 +141,7 @@ export default function Authenticated({
               </nav>
             </div>
             <div className="absolute bottom-0 w-full flex justify-between items-center bg-gray-50 p-4">
-              <p className="font-medium text-sm">{user.email}</p>
+              <p className="font-medium text-sm">{user.name}</p>
               <Link href={route("logout")} method="post" as="div">
                 <Button outline>Logout</Button>
               </Link>

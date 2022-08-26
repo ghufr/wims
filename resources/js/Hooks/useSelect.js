@@ -15,6 +15,7 @@ const useSelect = (defaultValue) => {
 
   return {
     select,
+    setSelect,
     isSelected,
     onSelectChange,
   };

@@ -1,16 +1,26 @@
 import React, { useEffect, useRef } from "react";
 
+import classNames from "classnames";
+
+const styles = {
+  base: "border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm",
+  disabled: "bg-gray-200",
+};
+
 export default function Input({
   type = "text",
   name,
   value,
-  className,
+  className = "",
   autoComplete,
   required,
   isFocused,
   onChange,
   uppercase = false,
   noSpace = false,
+  placeholder = "",
+  readOnly = false,
+  disabled = false,
 }) {
   const input = useRef();
 
@@ -38,14 +48,20 @@ export default function Input({
       type={type}
       name={name}
       value={value}
-      className={
-        `border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm ` +
-          className || ""
-      }
+      className={classNames(
+        {
+          [styles.base]: true,
+          [styles.disabled]: disabled || readOnly,
+        },
+        className
+      )}
       ref={input}
       autoComplete={autoComplete}
       required={required}
       onChange={handleChange}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      disabled={disabled}
     />
   );
 }

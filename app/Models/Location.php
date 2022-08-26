@@ -17,6 +17,6 @@ class Location extends Model
 
   public function warehouse()
   {
-    return $this->hasOne(Warehouse::class);
+    return $this->belongsTo(Warehouse::class);
   }
 }

@@ -35,12 +35,12 @@ const LocationCreate = ({ location = {} }) => {
         <div className="flex flex-col md:flex-row md:space-x-8">
           <div className="w-full">
             <div className="flex justify-between items-start mb-3">
-              <div className="w-full">
+              <div className="w-1/2">
                 <Label forInput="name" value="Name"></Label>
                 <InputError message={errors.name} />
               </div>
               <Input
-                className="w-full"
+                className="w-1/2"
                 onChange={handleChange}
                 value={data.name}
                 type="text"
@@ -53,12 +53,12 @@ const LocationCreate = ({ location = {} }) => {
             </div>
 
             <div className="flex justify-between items-start mb-3">
-              <div className="w-full">
+              <div className="w-1/2">
                 <Label forInput="type" value="Type"></Label>
                 <InputError message={errors.type} />
               </div>
               <Select
-                className="w-full"
+                className="w-1/2"
                 onChange={handleChange}
                 value={data.type}
                 name="type"
@@ -69,12 +69,12 @@ const LocationCreate = ({ location = {} }) => {
           </div>
           <div className="w-full">
             <div className="flex justify-between items-start mb-3">
-              <div className="w-full">
+              <div className="w-1/2">
                 <Label forInput="warehouse_id" value="Warehouse ID"></Label>
                 <InputError message={errors.warehouse_id} />
               </div>
               <Input
-                className="w-full"
+                className="w-1/2"
                 onChange={handleChange}
                 value={data.warehouse_id}
                 type="text"
@@ -83,12 +83,12 @@ const LocationCreate = ({ location = {} }) => {
               />
             </div>
             <div className="flex justify-between items-start mb-3">
-              <div className="w-full">
+              <div className="w-1/2">
                 <Label forInput="section" value="Section" />
                 <InputError message={errors.section} />
               </div>
               <Select
-                className="w-full"
+                className="w-1/2"
                 onChange={handleChange}
                 value={data.section}
                 name="section"

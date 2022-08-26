@@ -21,7 +21,7 @@ return new class extends Migration
       $table->foreignIdFor(Product::class)->constrained();
       $table->foreignIdFor(Warehouse::class)->constrained();
       $table->foreignIdFor(Location::class)->constrained();
-      $table->float('quantity')->min(0);
+      $table->integer('quantity')->min(0);
       $table->timestamps();
     });
   }
