@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Outbound;
+use App\Models\GoodsReceipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Inertia\Inertia;
 
-class OutboundController extends Controller
+class GoodsReceiptController extends Controller
 {
   /**
    * Display a listing of the resource.
@@ -16,7 +15,7 @@ class OutboundController extends Controller
    */
   public function index()
   {
-    return Inertia::render('Inbound/OutboundDelivery/Index');
+    //
   }
 
   /**
@@ -26,7 +25,7 @@ class OutboundController extends Controller
    */
   public function create()
   {
-    return Inertia::render('Inbound/OutboundDelivery/Create');
+    //
   }
 
   /**
@@ -48,9 +47,7 @@ class OutboundController extends Controller
    */
   public function show($id)
   {
-    return Inertia::render('Outbound/OutboundDelivery/Create', [
-      "vendor" => Outbound::where("id", $id)->first()
-    ]);
+    //
   }
 
   /**
@@ -73,8 +70,10 @@ class OutboundController extends Controller
    */
   public function destroy($id)
   {
+    $this->authorize('delete', Product::class);
+
     $ids = explode(',', $id);
-    Outbound::whereIn('id', $ids)->delete();
-    return Redirect::route('master.users.index');
+    GoodsReceipt::whereIn('id', $ids)->delete();
+    return Redirect::route('master.products.index');
   }
 }

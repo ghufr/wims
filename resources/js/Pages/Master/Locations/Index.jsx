@@ -9,6 +9,7 @@ import useSelect from "@/Hooks/useSelect";
 
 const LocationIndex = ({ locations }) => {
   const { select, setSelect, isSelected, onSelectChange } = useSelect([]);
+  // console.log(locations);
   const columns = [
     {
       name: "Name",
@@ -20,7 +21,8 @@ const LocationIndex = ({ locations }) => {
     },
     {
       name: "Warehouse",
-      selector: "warehouseId",
+      selector: "warehouse",
+      format: (warehouse) => warehouse.name,
     },
     {
       name: "Section",

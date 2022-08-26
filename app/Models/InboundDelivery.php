@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Inbound extends Model
+class InboundDelivery extends Model
 {
   use HasFactory;
 
@@ -30,6 +30,6 @@ class Inbound extends Model
 
   public function receipts()
   {
-    return $this->hasMany(Receipt::class);
+    return $this->hasMany(GoodsReceipt::class);
   }
 }

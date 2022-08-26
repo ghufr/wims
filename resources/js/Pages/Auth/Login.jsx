@@ -6,9 +6,10 @@ import Input from "@/Components/Input";
 import InputError from "@/Components/InputError";
 import Label from "@/Components/Label";
 import { Head, Link, useForm } from "@inertiajs/inertia-react";
+import axios from "axios";
 
 export default function Login({ status, canResetPassword }) {
-  const { data, setData, post, processing, errors, reset } = useForm({
+  const { data, setData, post, processing, errors, reset, setError } = useForm({
     email: "",
     password: "",
     remember: "",
@@ -29,8 +30,19 @@ export default function Login({ status, canResetPassword }) {
     );
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    // get jwt
+    const res = await axios
+      .post(route("api.login"), data)
+      .then((res) => res.data)
+      .catch(() => null);
+
+    if (!res) {
+      setError("email", "These credentials do not match our records.");
+      return;
+    }
+    window.localStorage.setItem("uhuyy", res.authorisation.token);
 
     post(route("login"));
   };

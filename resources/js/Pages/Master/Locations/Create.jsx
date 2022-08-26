@@ -6,12 +6,13 @@ import Label from "@/Components/Label";
 import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import Select from "@/Components/Select";
+import InputLookup from "@/Components/InputLookup";
 
 const LocationCreate = ({ location = {} }) => {
   const { data, setData, post, put, processing, errors } = useForm({
     name: location.name || "",
     type: location.type || "REG",
-    warehouse_id: location.warehouse_id || "",
+    warehouse: (location.warehouse && location.warehouse.name) || "",
     section: location.section || "FAST",
   });
 
@@ -63,23 +64,30 @@ const LocationCreate = ({ location = {} }) => {
                 value={data.type}
                 name="type"
                 id="type"
-                options={[{ value: "", label: "" }]}
+                options={[
+                  { value: "BULK", label: "BULK" },
+                  {
+                    value: "PICK",
+                    label: "PICK",
+                  },
+                ]}
               ></Select>
             </div>
           </div>
           <div className="w-full">
             <div className="flex justify-between items-start mb-3">
               <div className="w-1/2">
-                <Label forInput="warehouse_id" value="Warehouse ID"></Label>
-                <InputError message={errors.warehouse_id} />
+                <Label forInput="warehouse" value="Warehouse Name"></Label>
+                <InputError message={errors.warehouse} />
               </div>
-              <Input
-                className="w-1/2"
+              <InputLookup
+                endpoint={route("api.master.warehouses.index")}
+                name="warehouse"
+                id="warehouse"
+                resource="Warehouses"
+                value={data.warehouse}
                 onChange={handleChange}
-                value={data.warehouse_id}
-                type="text"
-                name="warehouse_id"
-                id="warehouse_id"
+                onFinish={(val) => setData("warehouse", val.name)}
               />
             </div>
             <div className="flex justify-between items-start mb-3">

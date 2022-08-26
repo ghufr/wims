@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Receipt;
+use App\Models\OutboundDelivery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
-class ReceiptController extends Controller
+class OutboundDeliveryController extends Controller
 {
   /**
    * Display a listing of the resource.
@@ -15,7 +16,7 @@ class ReceiptController extends Controller
    */
   public function index()
   {
-    //
+    return Inertia::render('Inbound/OutboundDelivery/Index');
   }
 
   /**
@@ -25,7 +26,7 @@ class ReceiptController extends Controller
    */
   public function create()
   {
-    //
+    return Inertia::render('Inbound/OutboundDelivery/Create');
   }
 
   /**
@@ -47,7 +48,9 @@ class ReceiptController extends Controller
    */
   public function show($id)
   {
-    //
+    return Inertia::render('Outbound/OutboundDelivery/Create', [
+      "vendor" => OutboundDelivery::where("id", $id)->first()
+    ]);
   }
 
   /**
@@ -70,10 +73,8 @@ class ReceiptController extends Controller
    */
   public function destroy($id)
   {
-    $this->authorize('delete', Product::class);
-
     $ids = explode(',', $id);
-    Receipt::whereIn('id', $ids)->delete();
-    return Redirect::route('master.products.index');
+    OutboundDelivery::whereIn('id', $ids)->delete();
+    return Redirect::route('master.users.index');
   }
 }

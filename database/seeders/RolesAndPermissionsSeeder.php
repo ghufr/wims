@@ -21,8 +21,8 @@ class RolesAndPermissionsSeeder extends Seeder
     app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
     $models = [
-      'Inbound', 'Outbound',
-      'Receipt', 'Delivery',
+      'InboundDelivery', 'OutboundDelivery',
+      'GoodsReceipt', 'OrderDelivery',
       'Product', 'Location',
       'Warehouse', 'Vendor',
       'Customer', 'User'

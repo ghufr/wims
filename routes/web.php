@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\InboundController;
+use App\Http\Controllers\GoodsReceiptController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OrderDeliveryController;
-use App\Http\Controllers\OutboundController;
+use App\Http\Controllers\InboundDeliveryController;
+use App\Http\Controllers\OutboundDeliveryController;
+
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
@@ -27,12 +29,12 @@ Route::get('/', [DashboardController::class, 'index'])->middleware(['auth'])->na
 
 
 Route::prefix('inbound')->name('inbound.')->middleware(['auth'])->group(function () {
-  Route::resource('delivery', InboundController::class);
-  Route::resource('receipt', Receipt::class);
+  Route::resource('delivery', InboundDeliveryController::class);
+  Route::resource('receipt', GoodsReceiptController::class);
 });
 
 Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(function () {
-  Route::resource('delivery', OutboundController::class);
+  Route::resource('delivery', OutboundDeliveryController::class);
   Route::resource('order', OrderDeliveryController::class);
 });
 

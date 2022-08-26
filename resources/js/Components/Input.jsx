@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
 
 const styles = {
-  base: "border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm",
+  base: "w-full border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm",
   disabled: "bg-gray-200",
 };
 
@@ -21,6 +21,7 @@ export default function Input({
   placeholder = "",
   readOnly = false,
   disabled = false,
+  ...props
 }) {
   const input = useRef();
 
@@ -39,8 +40,8 @@ export default function Input({
     if (uppercase) {
       modifiedE.target.value = e.target.value.toLocaleUpperCase();
     }
-    console.log(modifiedE.target.value);
-    onChange(modifiedE);
+    // console.log(modifiedE.target.value);
+    onChange && onChange(modifiedE);
   }
 
   return (
@@ -62,6 +63,7 @@ export default function Input({
       placeholder={placeholder}
       readOnly={readOnly}
       disabled={disabled}
+      {...props}
     />
   );
 }

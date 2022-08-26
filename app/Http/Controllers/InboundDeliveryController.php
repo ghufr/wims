@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Inbound;
+use App\Models\InboundDelivery;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-class InboundController extends Controller
+class InboundDeliveryController extends Controller
 {
   /**
    * Display a listing of the resource.
@@ -36,7 +37,15 @@ class InboundController extends Controller
    */
   public function store(Request $request)
   {
-    //
+    $request->validate([
+      'inboundNo' => 'required',
+      'client' => 'string',
+      'supplier' => 'required',
+      'deliveryDate' => 'required',
+      'products' => 'required'
+    ]);
+
+    Redirect::route('inbound.delivery.index');
   }
 
   /**
@@ -48,7 +57,7 @@ class InboundController extends Controller
   public function show($id)
   {
     return Inertia::render('Inbound/InboundDelivery/Create', [
-      "inbound" => Inbound::where("id", $id)->first()
+      "inbound" => InboundDelivery::where("id", $id)->first()
     ]);
   }
 
@@ -72,6 +81,8 @@ class InboundController extends Controller
    */
   public function destroy($id)
   {
-    //
+    $ids = explode(',', $id);
+    InboundDelivery::whereIn('id', $ids)->delete();
+    return Redirect::route('outbound.delivery.index');
   }
 }

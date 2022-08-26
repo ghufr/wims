@@ -70,11 +70,11 @@ export default function Authenticated({
       children: [
         {
           name: "Inbound Delivery",
-          href: "inbound.delivery",
+          href: "inbound.delivery.index",
         },
         {
           name: "Good Receiving",
-          href: "inbound.receipt",
+          href: "inbound.receipt.index",
         },
       ],
     },
@@ -84,11 +84,11 @@ export default function Authenticated({
       children: [
         {
           name: "Outbound Delivery",
-          href: "outbound.delivery",
+          href: "outbound.delivery.index",
         },
         {
           name: "Delivery Order",
-          href: "outbound.order",
+          href: "outbound.order.index",
         },
       ],
     },
@@ -130,7 +130,7 @@ export default function Authenticated({
         <title>{title}</title>
       </Head>
       <aside
-        className="hidden md:block max-w-xs w-full min-h-screen"
+        className="hidden md:block md:max-w-xs w-full min-h-screen"
         aria-label="Sidebar"
       >
         <div className="h-full bg-white border-r border-gray-200">
