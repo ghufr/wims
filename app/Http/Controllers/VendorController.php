@@ -11,6 +11,8 @@ class VendorController extends Controller
 {
   public function index()
   {
+    $this->authorize('viewAll', Vendor::class);
+
     return Inertia::render('Master/Vendors/Index', [
       'vendors' => Vendor::all()
     ]);
@@ -18,11 +20,15 @@ class VendorController extends Controller
 
   public function create()
   {
+    $this->authorize('create', Vendor::class);
+
     return Inertia::render('Master/Vendors/Create');
   }
 
   public function store(Request $request)
   {
+    $this->authorize('create', Vendor::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:vendors,name',
       'description' => 'nullable',
@@ -39,6 +45,8 @@ class VendorController extends Controller
 
   public function show($id)
   {
+    $this->authorize('view', Vendor::class);
+
     return Inertia::render('Master/Vendors/Create', [
       "vendor" => Vendor::where("id", $id)->first()
     ]);
@@ -46,6 +54,8 @@ class VendorController extends Controller
 
   public function update(Request $request, Vendor $vendor)
   {
+    $this->authorize('update', Vendor::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:vendors,name,' . $vendor->id,
       'description' => 'nullable',
@@ -63,6 +73,8 @@ class VendorController extends Controller
 
   public function destroy($id)
   {
+    $this->authorize('delete', Vendor::class);
+
     $ids = explode(',', $id);
     Vendor::whereIn('id', $ids)->delete();
     return Redirect::route('master.vendors.index');

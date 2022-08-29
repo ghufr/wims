@@ -81,7 +81,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                   id="grNo"
                   value={data.grNo}
                   onChange={handleChange}
-                  disabled={receipt.id || !can.edit_GoodsReceipt}
+                  disabled={true}
                 />
               </div>
             </div>
@@ -91,7 +91,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                 <InputError message={errors.client} />
               </div>
               <InputLookup
-                endpoint={route("api.master.vendors.index")}
+                endpoint={route("api.master.customers.index")}
                 name="client"
                 id="client"
                 resource="Client"
@@ -115,6 +115,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                 onChange={handleChange}
                 onFinish={(val) => setData("supplier", val.name)}
                 disabled={!can.edit_GoodsReceipt}
+                required
               />
             </div>
             <div className="flex mb-4">

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\OutboundDelivery;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use App\Services\ProductService;
+use App\Services\Utils;
 
 class OutboundDeliveryController extends Controller
 {
@@ -16,7 +19,15 @@ class OutboundDeliveryController extends Controller
    */
   public function index()
   {
-    return Inertia::render('Inbound/OutboundDelivery/Index');
+    $this->authorize('viewAll', OutboundDelivery::class);
+
+    return Inertia::render('Outbound/OutboundDelivery/Index', [
+      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
+      'can' => [
+        'edit_OutboundDelivery' => true,
+        'create_OutboundDelivery' => true
+      ]
+    ]);
   }
 
   /**
@@ -26,7 +37,13 @@ class OutboundDeliveryController extends Controller
    */
   public function create()
   {
-    return Inertia::render('Inbound/OutboundDelivery/Create');
+    $this->authorize('create', OutboundDelivery::class);
+
+    return Inertia::render('Outbound/OutboundDelivery/Create', [
+      'can' => [
+        'edit_OutboundDelivery' => true,
+      ]
+    ]);
   }
 
   /**
@@ -37,7 +54,35 @@ class OutboundDeliveryController extends Controller
    */
   public function store(Request $request)
   {
-    //
+    $this->authorize('create', OutboundDelivery::class);
+
+    $validated = $request->validate([
+      'deliveryDate' => 'required|date',
+      'products' => 'required|array',
+      'outboundNo' => 'sometimes|exists:outbound_deliveries,outboundNo',
+      'client' => 'required|exists:customers,id',
+      'origin' => 'required|exists:warehouses,id',
+      'destination' => 'required|exists:customers,id'
+    ]);
+
+    $outboundDelivery = new OutboundDelivery($validated);
+
+    $count = OutboundDelivery::where('deliveryDate', '=', $validated['deliveryDate'])->count();
+    $outboundDelivery->outboundNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 3);
+
+    $outboundDelivery->client()->associate($validated['client']);
+    $outboundDelivery->origin()->associate($validated['origin']);
+    $outboundDelivery->destination()->associate($validated['destination']);
+    $outboundDelivery->save();
+
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
+
+    $outboundDelivery->products()->attach($nProducts);
+    $outboundDelivery->save();
+
+    return Redirect::route('outbound.delivery.index');
   }
 
   /**
@@ -48,8 +93,18 @@ class OutboundDeliveryController extends Controller
    */
   public function show($id)
   {
+    $this->authorize('view', OutboundDelivery::class);
+
+    $outbound = OutboundDelivery::where('id', $id)->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
+    $products = $outbound->products->map->pivot;
+
+    $outbound = $outbound->toArray();
+    $outbound['products'] = $products->toArray();
     return Inertia::render('Outbound/OutboundDelivery/Create', [
-      "vendor" => OutboundDelivery::where("id", $id)->first()
+      "outbound" => $outbound,
+      "can" => [
+        'edit_OutboundDelivery' => $outbound['status'] === 'OPEN'
+      ]
     ]);
   }
 
@@ -62,6 +117,8 @@ class OutboundDeliveryController extends Controller
    */
   public function update(Request $request, $id)
   {
+    $this->authorize('update', OutboundDelivery::class);
+
     //
   }
 
@@ -73,8 +130,10 @@ class OutboundDeliveryController extends Controller
    */
   public function destroy($id)
   {
+    $this->authorize('delete', OutboundDelivery::class);
+
     $ids = explode(',', $id);
     OutboundDelivery::whereIn('id', $ids)->delete();
-    return Redirect::route('master.users.index');
+    return Redirect::route('outbound.delivery.index');
   }
 }

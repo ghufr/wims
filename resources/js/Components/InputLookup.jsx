@@ -33,6 +33,7 @@ export default function InputLookup({
   onFinish,
   onChange,
   disabled = false,
+  required = false,
 }) {
   const [_value, setValue] = useState({});
   const [isOpen, setIsOpen] = useState(false);
@@ -68,6 +69,7 @@ export default function InputLookup({
           value={value}
           disabled={disabled}
           uppercase
+          required={required}
         />
         {!disabled && (
           <ButtonIcon

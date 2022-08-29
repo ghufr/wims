@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeliveryOrderController;
 use App\Http\Controllers\GoodsReceiptController;
 use App\Http\Controllers\LocationController;
-use App\Http\Controllers\OrderDeliveryController;
 use App\Http\Controllers\InboundDeliveryController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OutboundDeliveryController;
 
 use App\Http\Controllers\ProductController;
@@ -42,13 +43,15 @@ Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(functi
   Route::resources(
     [
       'delivery' => OutboundDeliveryController::class,
-      'order' => OrderDeliveryController::class
+      'order' => DeliveryOrderController::class
     ],
     ['except' => ['edit']]
   );
 });
 
-
+Route::prefix('inventory')->name('inventory.')->middleware(['auth'])->group(function () {
+  Route::get('list', [InventoryController::class, 'index'])->name('list.index');
+});
 
 Route::prefix('master')->name('master.')->middleware(['auth'])->group(function () {
   Route::resources(

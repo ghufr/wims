@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\Location;
-use App\Models\Product;
-use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,7 +18,7 @@ return new class extends Migration
       $table->string('name')->unique();
       $table->string('section');
       $table->string('type');
-      $table->foreignIdFor(Warehouse::class);
+      $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('cascade');
       $table->timestamps();
     });
   }

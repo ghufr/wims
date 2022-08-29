@@ -9,4 +9,7 @@
   select {
     appearance: none;
   }
+  textarea {
+    resize: none;
+  }
 }

@@ -22,7 +22,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
     $models = [
       'InboundDelivery', 'OutboundDelivery',
-      'GoodsReceipt', 'OrderDelivery',
+      'GoodsReceipt', 'DeliveryOrder',
       'Product', 'Location',
       'Warehouse', 'Vendor',
       'Customer', 'User'
@@ -30,12 +30,13 @@ class RolesAndPermissionsSeeder extends Seeder
     $methods = ['viewAll', 'view', 'create', 'delete', 'update'];
 
     $permissions = [];
-
+    $staffPermissions = [];
 
     foreach ($models as $model) {
       foreach ($methods as $method) {
         array_push($permissions, ['name' => $method . '_' . $model, 'guard_name' => 'web']);
       }
+      array_push($staffPermissions, ...['view_' . $model, 'viewAll_' . $model]);
     }
 
     Permission::insertOrIgnore($permissions);
@@ -44,7 +45,8 @@ class RolesAndPermissionsSeeder extends Seeder
     $adminRole->givePermissionTo(Permission::all());
 
     $staffRole = Role::create(['name' => 'staff']);
-    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_OrderDelivery']);
+    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', ...$staffPermissions]);
+
 
 
     $admin = User::factory()->create([

@@ -55,9 +55,14 @@ const InboundIndex = ({ inbounds }) => {
             <Button>Create Inbound</Button>
           </Link>
           {isSelected && (
-            <Button outline onClick={() => handleMassDelete(select)}>
-              Delete Selected ({select.length})
-            </Button>
+            <>
+              <Button outline onClick={() => {}}>
+                Goods Receipt ({select.length})
+              </Button>
+              <Button outline onClick={() => handleMassDelete(select)}>
+                Delete Selected ({select.length})
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -77,7 +82,7 @@ const InboundIndex = ({ inbounds }) => {
 };
 
 InboundIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Inbounds">
+  <Authenticated user={page.props.auth.user} title="Inbound Deliveries">
     {page}
   </Authenticated>
 );

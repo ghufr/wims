@@ -18,7 +18,7 @@ return new class extends Migration
       $table->string('inboundNo')->unique();
       $table->string('status')->default('OPEN');
       $table->date('deliveryDate');
-      $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();
+      $table->foreignId('client_id')->nullable()->constrained('customers')->restrictOnDelete();
       $table->foreignId('supplier_id')->constrained('vendors')->restrictOnDelete();
       $table->timestamps();
     });

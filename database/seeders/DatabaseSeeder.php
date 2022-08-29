@@ -5,15 +5,11 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Customer;
-use App\Models\InboundDelivery;
-use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
-use App\Models\User;
 use App\Models\Vendor;
 use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,7 +34,11 @@ class DatabaseSeeder extends Seeder
     Customer::factory()->count(5)->create();
 
     $this->call(
-      InboundSeeder::class,
+      [
+        InboundSeeder::class,
+        InventorySeeder::class,
+        OutboundSeeder::class
+      ]
     );
   }
 }

@@ -19,16 +19,17 @@ class GoodsReceiptFactory extends Factory
    */
   public function definition()
   {
+
+    $inbound = InboundDelivery::inRandomOrder()->limit(1)->get()->first();
+    $warehouse = Warehouse::inRandomOrder()->limit(1)->get()->first();
+
     $grDate = fake()->dateTimeBetween('-1 week', '-1 day');
-
-    $inbound = InboundDelivery::inRandomOrder()->first();
-
-    $warehouse = Warehouse::inRandomOrder()->first();
+    $reference = rand(0, 1) === 1 ? 'PUTAWAY-' . date_format($grDate, 'Ymd') . fake()->numerify('##') : null;
 
     return [
       'grNo' => fake()->ean13(),
       'inboundNo' => $inbound->inboundNo,
-      'reference' => 'PUTAWAY-' . date_format($grDate, 'Ymd') . fake()->numerify('##'),
+      'reference' => $reference,
       'grDate' => $grDate,
       'client_id' => $inbound->client,
       'supplier_id' => $inbound->supplier,

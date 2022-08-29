@@ -7,28 +7,23 @@ const InventoryListIndex = ({ inventories }) => {
   // const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
   const columns = [
     {
-      name: "Name",
-      selector: "name",
+      name: "Warehouse",
+      selector: "warehouse",
+      format: (val) => val.name,
     },
     {
-      name: "Description",
-      selector: "description",
+      name: "Location",
+      selector: "location",
+      format: (val) => val.name,
     },
     {
-      name: "Address",
-      selector: "address",
+      name: "Product",
+      selector: "product",
+      format: (val) => val.name,
     },
     {
-      name: "Address 2",
-      selector: "address2",
-    },
-    {
-      name: "City",
-      selector: "city",
-    },
-    {
-      name: "Postal",
-      selector: "postalCode",
+      name: "Quantity",
+      selector: "quantity",
     },
     {
       name: "Updated At",
@@ -43,13 +38,18 @@ const InventoryListIndex = ({ inventories }) => {
 
   return (
     <div>
-      <Table columns={columns} data={inventories} />
+      <Table
+        columns={columns}
+        data={inventories}
+        // rowEdit={(row) => route("inbound.delivery.show", { id: row.id })}
+        // rowDelete={(row) => handleDelete(row.id)}
+      />
     </div>
   );
 };
 
 InventoryListIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="InventoryLists">
+  <Authenticated user={page.props.auth.user} title="Inventory List">
     {page}
   </Authenticated>
 );

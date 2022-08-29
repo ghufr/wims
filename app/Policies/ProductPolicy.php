@@ -16,9 +16,9 @@ class ProductPolicy
    * @param  \App\Models\User  $user
    * @return \Illuminate\Auth\Access\Response|bool
    */
-  public function viewAny(User $user)
+  public function viewAll(User $user)
   {
-    if ($user->can('view all product')) {
+    if ($user->can('viewAll_Product')) {
       return true;
     }
   }
@@ -32,7 +32,9 @@ class ProductPolicy
    */
   public function view(User $user, Product $product)
   {
-    //
+    if ($user->can('view_Product')) {
+      return true;
+    }
   }
 
   /**
@@ -43,7 +45,7 @@ class ProductPolicy
    */
   public function create(User $user)
   {
-    if ($user->can('create product')) {
+    if ($user->can('create_Product')) {
       return true;
     }
   }
@@ -57,7 +59,7 @@ class ProductPolicy
    */
   public function update(User $user, Product $product)
   {
-    if ($user->can('edit all product')) {
+    if ($user->can('edit_Product')) {
       return true;
     }
   }
@@ -71,32 +73,8 @@ class ProductPolicy
    */
   public function delete(User $user, Product $product)
   {
-    if ($user->can('delete any post')) {
+    if ($user->can('delete_Product')) {
       return true;
     }
-  }
-
-  /**
-   * Determine whether the user can restore the model.
-   *
-   * @param  \App\Models\User  $user
-   * @param  \App\Models\Product  $product
-   * @return \Illuminate\Auth\Access\Response|bool
-   */
-  public function restore(User $user, Product $product)
-  {
-    //
-  }
-
-  /**
-   * Determine whether the user can permanently delete the model.
-   *
-   * @param  \App\Models\User  $user
-   * @param  \App\Models\Product  $product
-   * @return \Illuminate\Auth\Access\Response|bool
-   */
-  public function forceDelete(User $user, Product $product)
-  {
-    //
   }
 }

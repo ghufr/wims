@@ -11,6 +11,8 @@ class CustomerController extends Controller
 {
   public function index()
   {
+    $this->authorize('viewAll', Customer::class);
+
     return Inertia::render('Master/Customers/Index', [
       'customers' => Customer::all()
     ]);
@@ -18,11 +20,15 @@ class CustomerController extends Controller
 
   public function create()
   {
+    $this->authorize('create', Customer::class);
+
     return Inertia::render('Master/Customers/Create');
   }
 
   public function store(Request $request)
   {
+    $this->authorize('create', Customer::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:customers,name',
       'description' => 'nullable',
@@ -39,6 +45,8 @@ class CustomerController extends Controller
 
   public function show($id)
   {
+    $this->authorize('view', Customer::class);
+
     return Inertia::render('Master/Customers/Create', [
       "customer" => Customer::where("id", $id)->first()
     ]);
@@ -46,6 +54,8 @@ class CustomerController extends Controller
 
   public function update(Request $request, Customer $customer)
   {
+    $this->authorize('update', Customer::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:customers,name,' . $customer->id,
       'description' => 'nullable',
@@ -63,6 +73,8 @@ class CustomerController extends Controller
 
   public function destroy($id)
   {
+    $this->authorize('delete', Customer::class);
+
     $ids = explode(',', $id);
     Customer::whereIn('id', $ids)->delete();
     return Redirect::route('master.customers.index');

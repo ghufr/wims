@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
   public function index()
   {
+
     return Inertia::render('Master/Users/Index', [
       'users' => User::all()->makeHidden(['password'])
     ]);
@@ -22,7 +25,15 @@ class UserController extends Controller
 
   public function create()
   {
-    return Inertia::render('Master/Users/Create');
+    $permissions = Permission::all()->groupBy(function ($item, $key) {
+      return explode('_', $item['name'])[1];
+    });
+    $roles = Role::all();
+
+    return Inertia::render('Master/Users/Create', [
+      'roles' => $roles,
+      'permissions' => $permissions,
+    ]);
   }
 
   public function store(Request $request)
@@ -48,8 +59,16 @@ class UserController extends Controller
 
   public function show($id)
   {
+    $permissions = Permission::all()->groupBy(function ($item, $key) {
+      return explode('_', $item['name'])[1];
+    });
+
+    $roles = Role::all();
+
     return Inertia::render('Master/Users/Create', [
-      "user" => User::where("id", $id)->first()->makeHidden(['password'])
+      "user" => User::where("id", $id)->first()->makeHidden(['password']),
+      'permissions' => $permissions,
+      'roles' => $roles,
     ]);
   }
 

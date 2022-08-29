@@ -15,6 +15,14 @@ const GoodsReceiptIndex = ({ receipts }) => {
       selector: "grNo",
     },
     {
+      name: "GR Date",
+      selector: "grDate",
+    },
+    {
+      name: "Reference",
+      selector: "reference",
+    },
+    {
       name: "Inb. No.",
       selector: "inboundNo",
     },
@@ -22,14 +30,6 @@ const GoodsReceiptIndex = ({ receipts }) => {
       name: "Warehouse",
       selector: "warehouse",
       format: (val) => val && val.name,
-    },
-    {
-      name: "Reference",
-      selector: "reference",
-    },
-    {
-      name: "GR Date",
-      selector: "grDate",
     },
     {
       name: "Supplier",
@@ -64,9 +64,14 @@ const GoodsReceiptIndex = ({ receipts }) => {
             <Button>Create Goods Receipt</Button>
           </Link>
           {isSelected && (
-            <Button outline onClick={() => handleMassDelete(select)}>
-              Delete Selected ({select.length})
-            </Button>
+            <>
+              <Button outline onClick={() => {}}>
+                Putaway ({select.length})
+              </Button>
+              <Button outline onClick={() => handleMassDelete(select)}>
+                Delete Selected ({select.length})
+              </Button>
+            </>
           )}
         </div>
       </div>

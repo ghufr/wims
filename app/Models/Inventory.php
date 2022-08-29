@@ -15,16 +15,16 @@ class Inventory extends Model
 
   public function product()
   {
-    $this->hasOne(Product::class);
+    return $this->belongsTo(Product::class);
   }
 
   public function location()
   {
-    $this->hasOne(Location::class);
+    return $this->belongsTo(Location::class);
   }
 
   public function warehouse()
   {
-    $this->hasOne(Warehouse::class);
+    return $this->belongsTo(Warehouse::class);
   }
 }

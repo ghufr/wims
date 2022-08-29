@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\InboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;
+use App\Services\ProductService;
+use App\Services\Utils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class InboundDeliveryController extends Controller
@@ -33,6 +32,8 @@ class InboundDeliveryController extends Controller
    */
   public function create()
   {
+    $this->authorize('viewAll', InboundDelivery::class);
+
     return Inertia::render('Inbound/InboundDelivery/Create', [
       "can" => [
         'edit_InboundDelivery' => true
@@ -48,34 +49,33 @@ class InboundDeliveryController extends Controller
    */
   public function store(Request $request)
   {
+    $this->authorize('create', InboundDelivery::class);
+
     $validated = $request->validate([
-      'client' => 'sometimes|exists:vendors,name',
+      'client' => 'required|exists:vendors,name',
       'supplier' => 'required|exists:vendors,name',
-      'deliveryDate' => 'required',
+      'deliveryDate' => 'required|date',
+      'products' => 'required|array',
     ]);
 
 
     $inboundDelivery = new InboundDelivery($validated);
 
-    $client = Vendor::where('name', $validated['client'])->first();
-    $supplier = Vendor::where('name', $validated['supplier'])->first();
+    $client = Vendor::where('name', $validated['client'])->firstOrFail();
+    $supplier = Vendor::where('name', $validated['supplier'])->firstOrFail();
 
-    $date = date_create($validated['deliveryDate']);
-    $count = InboundDelivery::where('deliveryDate', '=', $validated['deliveryDate'])->count();
-    $inboundDelivery->inboundNo = date_format($date, "Ymd") . $count + 1000;
+    $count = InboundDelivery::where('deliveryDate', $validated['deliveryDate'])->count();
+    $inboundDelivery->inboundNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 1);
 
-    if ($client) {
-      $inboundDelivery->client()->associate($client);
-    }
+    $inboundDelivery->client()->associate($client);
     $inboundDelivery->supplier()->associate($supplier);
     $inboundDelivery->save();
 
-    $reqProducts = $request->input('products');
-    $productIds = Arr::pluck($reqProducts, 'id');
-    $products = Product::whereIn('id', $productIds)->get();
-    $productsQuantity = $this->transformProduct($reqProducts, $products);
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
 
-    $inboundDelivery->products()->attach($productsQuantity);
+    $inboundDelivery->products()->attach($nProducts);
     $inboundDelivery->save();
 
     return Redirect::route('inbound.delivery.index');
@@ -83,6 +83,8 @@ class InboundDeliveryController extends Controller
 
   public function show($id)
   {
+    $this->authorize('view', InboundDelivery::class);
+
     $inbound = InboundDelivery::where("id", $id)->with(['client:id,name', 'supplier:id,name', 'products:id'])->firstOrFail();
     $products = $inbound->products->map->pivot;
 
@@ -99,6 +101,8 @@ class InboundDeliveryController extends Controller
 
   public function update(Request $request, InboundDelivery $inboundDelivery)
   {
+    $this->authorize('update', InboundDelivery::class);
+
     $validated = $request->validate([
       'client' => 'sometimes|exists:vendors,name',
       'supplier' => 'required|exists:vendors,name',
@@ -126,24 +130,10 @@ class InboundDeliveryController extends Controller
    */
   public function destroy($id)
   {
+    $this->authorize('delete', InboundDelivery::class);
+
     $ids = explode(',', $id);
     InboundDelivery::whereIn('id', $ids)->delete();
     return Redirect::route('inbound.delivery.index');
-  }
-
-
-  protected function transformProduct($reqProducts, $products)
-  {
-    $productsQuantity = [];
-    $quantityById = Arr::pluck($reqProducts, 'quantity', 'id');
-
-    foreach ($products as $product) {
-      $productsQuantity[$product->id] = [
-        'name' => $product->name,
-        'baseUom' => $product->baseUom,
-        'description' => $product->description,
-        'quantity' => $quantityById[$product->id]
-      ];
-    }
   }
 }

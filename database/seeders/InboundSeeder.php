@@ -22,7 +22,6 @@ class InboundSeeder extends Seeder
     $inbounds = InboundDelivery::factory(5)->create();
     $receipts = GoodsReceipt::factory(5)->create();
 
-
     foreach ($inbounds as $key => $inbound) {
       $products = Product::inRandomOrder()->limit(rand(2, 4))->get();
       $receipt = $receipts->get($key);
@@ -31,11 +30,11 @@ class InboundSeeder extends Seeder
         $nProduct = ['quantity' => rand(10, 100), ...$product->only(['name', 'description', 'baseUom'])];
 
         $receipt->products()->attach($product->id, $nProduct);
-        $receipt->save();
 
         $inbound->products()->attach($product->id, $nProduct);
-        $inbound->save();
       }
+      $inbound->save();
+      $receipt->save();
     }
   }
 }

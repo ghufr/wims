@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodsReceipt;
+use App\Models\Product;
 use App\Models\Vendor;
+use App\Services\ProductService;
+use App\Services\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -17,6 +20,8 @@ class GoodsReceiptController extends Controller
    */
   public function index()
   {
+    $this->authorize('viewAll', GoodsReceipt::class);
+
     return Inertia::render('Inbound/GoodsReceipt/Index', [
       'receipts' => GoodsReceipt::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->get()
     ]);
@@ -29,6 +34,8 @@ class GoodsReceiptController extends Controller
    */
   public function create()
   {
+    $this->authorize('create', GoodsReceipt::class);
+
     return Inertia::render('Inbound/GoodsReceipt/Create', [
       'can' => [
         'edit_GoodsReceipt' => true
@@ -44,26 +51,33 @@ class GoodsReceiptController extends Controller
    */
   public function store(Request $request)
   {
+    $this->authorize('create', GoodsReceipt::class);
+
     $validated = $request->validate([
-      'client' => 'sometimes|exists:vendors,name',
+      'client' => 'required|exists:vendors,name',
       'supplier' => 'required|exists:vendors,name',
+      'inboundNo' => 'sometimes|exists:inbound_deliveries,inboundNo',
       'grDate' => 'required',
+      'products' => 'required|array',
     ]);
 
     $goodsReceipt = new GoodsReceipt($validated);
 
-    $client = Vendor::where('name', $validated['client'])->first();
-    $supplier = Vendor::where('name', $validated['supplier'])->first();
+    $client = Vendor::where('name', $validated['client'])->firstOrFail();
+    $supplier = Vendor::where('name', $validated['supplier'])->firstOrFail();
 
-    $date = date_create($validated['grDate']);
     $count = GoodsReceipt::where('grDate', '=', $validated['grDate'])->count();
-    $goodsReceipt->inboundNo = date_format($date, "Ymd") . $count + 2000;
+    $goodsReceipt->grNo = Utils::generateIncrementNo($validated['grDate'], $count, 1);
 
-    if ($client) {
-      $goodsReceipt->client()->associate($client);
-    }
+    $goodsReceipt->client()->associate($client);
     $goodsReceipt->supplier()->associate($supplier);
+    $goodsReceipt->save();
 
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
+
+    $goodsReceipt->products()->attach($nProducts);
     $goodsReceipt->save();
   }
 
@@ -75,6 +89,8 @@ class GoodsReceiptController extends Controller
    */
   public function show($id)
   {
+    $this->authorize('view', GoodsReceipt::class);
+
     $receipt = GoodsReceipt::where('id', $id)->with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->firstOrFail();
     $products = $receipt->products->map->pivot;
 
@@ -98,7 +114,7 @@ class GoodsReceiptController extends Controller
    */
   public function update(Request $request, $id)
   {
-    //
+    $this->authorize('update', GoodsReceipt::class);
   }
 
   /**
@@ -109,7 +125,7 @@ class GoodsReceiptController extends Controller
    */
   public function destroy($id)
   {
-    // $this->authorize('delete', Product::class);
+    $this->authorize('delete', GoodsReceipt::class);
 
     $ids = explode(',', $id);
     GoodsReceipt::whereIn('id', $ids)->delete();

@@ -64,7 +64,7 @@ const Table = ({
                 const value = row[selector];
                 const formattedValue = format ? format(value) : value;
 
-                if (i === 0) {
+                if (i === 0 && rowEdit) {
                   return (
                     <td className="p-1" key={i}>
                       <Link

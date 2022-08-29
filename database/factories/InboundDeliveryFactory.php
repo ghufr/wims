@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,13 +18,14 @@ class InboundDeliveryFactory extends Factory
    */
   public function definition()
   {
-    $vendors = Vendor::inRandomOrder()->get();
+    $supplier = Vendor::inRandomOrder()->limit(1)->get()->first();
+    $client = Customer::inRandomOrder()->limit(1)->get()->first();
     return [
       'inboundNo' => fake()->ean13(),
       'status' => fake()->randomElement(['OPEN', 'CLOSE']),
       'deliveryDate' => fake()->dateTimeBetween('-1 week', '+1 week'),
-      'client_id' => $vendors->first(),
-      'supplier_id' => $vendors->last(),
+      'client_id' => $client,
+      'supplier_id' => $supplier,
     ];
   }
 }

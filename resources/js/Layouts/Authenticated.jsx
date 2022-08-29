@@ -8,8 +8,9 @@ import {
   HiChevronDown,
   HiOutlineCog,
   HiOutlineArrowSmLeft,
+  HiOutlineArchive,
 } from "react-icons/hi";
-import { Head, Link } from "@inertiajs/inertia-react";
+import { Head, Link, usePage } from "@inertiajs/inertia-react";
 import NavLink from "@/Components/NavLink";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ const queryClient = new QueryClient();
 
 const renderMenu = (menu) => {
   if (menu.children) {
+    if (menu.children.filter((sub) => sub.show).length < 1) return;
     return (
       <Disclosure key={menu.name} as={"li"} defaultOpen={false}>
         <Disclosure.Button
@@ -43,6 +45,9 @@ const renderMenu = (menu) => {
       </Disclosure>
     );
   }
+
+  if (!menu.show) return;
+
   return (
     <li key={menu.name}>
       <NavLink
@@ -62,11 +67,20 @@ export default function Authenticated({
   description,
   children,
 }) {
+  const { props } = usePage();
+
+  function can(permission) {
+    return props.can[permission] != -1;
+  }
+
+  console.log(props);
+
   const menus = [
     {
       name: "Dashboard",
       href: "dashboard",
       icon: HiOutlineHome,
+      show: true,
     },
     {
       name: "Inbound",
@@ -75,10 +89,23 @@ export default function Authenticated({
         {
           name: "Inbound Delivery",
           href: "inbound.delivery.index",
+          show: can("viewAll_InboundDelivery"),
         },
         {
-          name: "Good Receiving",
+          name: "Goods Receiving",
           href: "inbound.receipt.index",
+          show: can("viewAll_GoodsReceipt"),
+        },
+      ],
+    },
+    {
+      name: "Inventory",
+      icon: HiOutlineArchive,
+      children: [
+        {
+          name: "Inventory List",
+          href: "inventory.list.index",
+          show: can("viewAll_Inventory"),
         },
       ],
     },
@@ -89,10 +116,12 @@ export default function Authenticated({
         {
           name: "Outbound Delivery",
           href: "outbound.delivery.index",
+          show: can("viewAll_OutboundDelivery"),
         },
         {
           name: "Delivery Order",
           href: "outbound.order.index",
+          show: can("viewAll_DeliveryOrder"),
         },
       ],
     },
@@ -103,26 +132,32 @@ export default function Authenticated({
         {
           name: "Products",
           href: "master.products.index",
+          show: can("viewAll_Product"),
         },
         {
           name: "Warehouses",
           href: "master.warehouses.index",
+          show: can("viewAll_Warehouse"),
         },
         {
           name: "Locations",
           href: "master.locations.index",
+          show: can("viewAll_Locations"),
         },
         {
           name: "Vendors",
           href: "master.vendors.index",
+          show: can("viewAll_Vendors"),
         },
         {
           name: "Customers",
           href: "master.customers.index",
+          show: can("viewAll_Customers"),
         },
         {
           name: "Users",
           href: "master.users.index",
+          show: can("viewAll_Users"),
         },
       ],
     },

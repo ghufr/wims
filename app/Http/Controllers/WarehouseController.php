@@ -11,6 +11,8 @@ class WarehouseController extends Controller
 {
   public function index()
   {
+    $this->authorize('viewAll', Warehouse::class);
+
     return Inertia::render('Master/Warehouses/Index', [
       'warehouses' => Warehouse::all()
     ]);
@@ -18,11 +20,15 @@ class WarehouseController extends Controller
 
   public function create()
   {
+    $this->authorize('create', Warehouse::class);
+
     return Inertia::render('Master/Warehouses/Create');
   }
 
   public function store(Request $request)
   {
+    $this->authorize('create', Warehouse::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:warehouses,name',
       'description' => 'nullable',
@@ -39,6 +45,8 @@ class WarehouseController extends Controller
 
   public function show($id)
   {
+    $this->authorize('view', Warehouse::class);
+
     return Inertia::render('Master/Warehouses/Create', [
       "warehouse" => Warehouse::where("id", $id)->first()
     ]);
@@ -46,6 +54,8 @@ class WarehouseController extends Controller
 
   public function update(Request $request, Warehouse $warehouse)
   {
+    $this->authorize('update', Warehouse::class);
+
     $validated = $request->validate([
       'name' => 'required|unique:warehouses,name,' . $warehouse->id,
       'description' => 'nullable',
@@ -62,6 +72,8 @@ class WarehouseController extends Controller
 
   public function destroy($id)
   {
+    $this->authorize('delete', Warehouse::class);
+
     $ids = explode(',', $id);
     Warehouse::whereIn('id', $ids)->delete();
     return Redirect::route('master.warehouses.index');

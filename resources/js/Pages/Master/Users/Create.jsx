@@ -7,26 +7,20 @@ import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 // import Select from "@/Components/Select";
 import Checkbox from "@/Components/Checkbox";
+import Select from "@/Components/Select";
+import useSelect from "@/Hooks/useSelect";
 
-const models = [
-  "Inbound Delivery",
-  "Outbound Delivery",
-  "Good Receipt",
-  "Delivery Order",
-  "Product",
-  "Warehouse",
-  "Location",
-  "Vendor",
-  "Customer",
-  "User",
-];
+const methods = ["View", "ViewAll", "Create", "Delete", "Update"];
 
-const UserCreate = ({ user = {} }) => {
+const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
   const { data, setData, post, put, processing, errors } = useForm({
     name: user.name || "",
     email: user.email || "",
     password: user.password || "",
+    role: "",
   });
+
+  const { select, isSelected, onSelectChange } = useSelect([]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -93,7 +87,7 @@ const UserCreate = ({ user = {} }) => {
                 placeholder={user.id ? "(Unchanged)" : ""}
               />
             </div>
-            {/* <div className="flex justify-between items-start mb-3">
+            <div className="flex justify-between items-start mb-3">
               <div className="w-1/2">
                 <Label forInput="role" value="Role"></Label>
                 <InputError message={errors.role} />
@@ -105,12 +99,12 @@ const UserCreate = ({ user = {} }) => {
                 name="role"
                 id="role"
                 required
-                options={[
-                  { value: "operator", label: "Operator" },
-                  { value: "admin", label: "Admin" },
-                ]}
+                options={roles.map(({ name }) => ({
+                  value: name,
+                  label: name,
+                }))}
               />
-            </div> */}
+            </div>
           </div>
         </div>
         <div className="justify-end space-x-2 flex">
@@ -130,51 +124,43 @@ const UserCreate = ({ user = {} }) => {
         <table className="text-left table-auto w-full">
           <thead>
             <tr>
-              <th></th>
-              <th></th>
               <th>
-                <Checkbox value="view" />
+                <p>Model</p>
               </th>
-              <th>
-                <Checkbox value="view" />
-              </th>
-              <th>
-                <Checkbox value="view" />
-              </th>
-              <th>
-                <Checkbox value="view" />
-              </th>
-            </tr>
-            <tr>
-              <th></th>
-              <th>Model</th>
-              <th>View</th>
-              <th>Create</th>
-              <th>Delete</th>
-              <th>Update</th>
+              {methods.map((name) => (
+                <th key={name}>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox value={name} id={name} />
+                    <Label forInput={name}>{name}</Label>
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {models.map((model, i) => (
-              <tr key={i}>
-                <td>
-                  <Checkbox />
-                </td>
-                <td className="py-2">{model}</td>
-                <td className="py-2">
-                  <Checkbox value="view" />
-                </td>
-                <td className="py-2">
-                  <Checkbox value="create" />
-                </td>
-                <td className="py-2">
-                  <Checkbox value="delete" />
-                </td>
-                <td className="py-2">
-                  <Checkbox value="update" />
-                </td>
-              </tr>
-            ))}
+            {Object.keys(permissions).map((key, i) => {
+              const models = permissions[key];
+              return (
+                <tr key={i}>
+                  <td>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox value={key} id={key} />
+                      <Label forInput={key}>{key}</Label>
+                    </div>
+                  </td>
+
+                  {models.map((item) => (
+                    <td className="py-2" key={item.name}>
+                      <Checkbox
+                        value={item.name}
+                        checked={select.indexOf(item.name) > -1}
+                        onChange={() => onSelectChange(item.name)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </form>

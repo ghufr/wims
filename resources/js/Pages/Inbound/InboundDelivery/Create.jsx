@@ -71,7 +71,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                 <InputError message={errors.client} />
               </div>
               <InputLookup
-                endpoint={route("api.master.vendors.index")}
+                endpoint={route("api.master.customers.index")}
                 name="client"
                 id="client"
                 resource="Client"

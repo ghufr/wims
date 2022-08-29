@@ -17,7 +17,7 @@ return new class extends Migration
       $table->id();
       $table->string('grNo')->unique();
       $table->string('inboundNo')->nullable();
-      $table->string('reference');
+      $table->string('reference')->nullable();
       $table->date('grDate');
       $table->foreignId('warehouse_id')->constrained('warehouses')->restrictOnDelete();
       $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();

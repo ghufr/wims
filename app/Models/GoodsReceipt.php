@@ -18,23 +18,18 @@ class GoodsReceipt extends Model
 
   public function client()
   {
-    return $this->belongsTo(Customer::class);
+    return $this->belongsTo(Customer::class, 'client_id', 'id');
   }
 
   public function supplier()
   {
-    return $this->belongsTo(Vendor::class);
+    return $this->belongsTo(Vendor::class, 'supplier_id', 'id');
   }
 
   public function warehouse()
   {
-    return $this->belongsTo(Warehouse::class);
+    return $this->belongsTo(Warehouse::class, 'warehouse_id', 'id');
   }
-
-  // public function inbound()
-  // {
-  //   return $this->belongsTo(Inbound::class);
-  // }
 
   public function products()
   {
