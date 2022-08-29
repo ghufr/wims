@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Customer;
+use App\Models\InboundDelivery;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
@@ -33,13 +34,11 @@ class DatabaseSeeder extends Seeder
         'warehouse_id' => $warehouse->id
       ]);
     });
-    // Inventory::factory()
-    //   ->hasProducts(1)
-    //   ->hasWarehouses(1)
-    //   ->hasLocations(1)
-    //   ->count(10)
-    //   ->create();
     Vendor::factory()->count(5)->create();
     Customer::factory()->count(5)->create();
+
+    $this->call(
+      InboundSeeder::class,
+    );
   }
 }

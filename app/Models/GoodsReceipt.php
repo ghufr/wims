@@ -10,7 +10,10 @@ class GoodsReceipt extends Model
   use HasFactory;
 
   protected $fillable = [
-    'grNo'
+    'grNo',
+    'inboundNo',
+    'reference',
+    'grDate'
   ];
 
   public function client()
@@ -23,8 +26,23 @@ class GoodsReceipt extends Model
     return $this->belongsTo(Vendor::class);
   }
 
-  public function inbound()
+  public function warehouse()
   {
-    return $this->belongsTo(Inbound::class);
+    return $this->belongsTo(Warehouse::class);
+  }
+
+  // public function inbound()
+  // {
+  //   return $this->belongsTo(Inbound::class);
+  // }
+
+  public function products()
+  {
+    return $this->belongsToMany(Product::class)->withPivot([
+      'name',
+      'description',
+      'baseUom',
+      'quantity'
+    ]);
   }
 }

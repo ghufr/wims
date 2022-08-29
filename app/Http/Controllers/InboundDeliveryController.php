@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\InboundDelivery;
+use App\Models\Product;
+use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class InboundDeliveryController extends Controller
@@ -16,7 +21,9 @@ class InboundDeliveryController extends Controller
    */
   public function index()
   {
-    return Inertia::render('Inbound/InboundDelivery/Index');
+    return Inertia::render('Inbound/InboundDelivery/Index', [
+      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get()
+    ]);
   }
 
   /**
@@ -26,7 +33,11 @@ class InboundDeliveryController extends Controller
    */
   public function create()
   {
-    return Inertia::render('Inbound/InboundDelivery/Create');
+    return Inertia::render('Inbound/InboundDelivery/Create', [
+      "can" => [
+        'edit_InboundDelivery' => true
+      ]
+    ]);
   }
 
   /**
@@ -37,40 +48,74 @@ class InboundDeliveryController extends Controller
    */
   public function store(Request $request)
   {
-    $request->validate([
-      'inboundNo' => 'required',
-      'client' => 'string',
-      'supplier' => 'required',
+    $validated = $request->validate([
+      'client' => 'sometimes|exists:vendors,name',
+      'supplier' => 'required|exists:vendors,name',
       'deliveryDate' => 'required',
-      'products' => 'required'
     ]);
 
-    Redirect::route('inbound.delivery.index');
+
+    $inboundDelivery = new InboundDelivery($validated);
+
+    $client = Vendor::where('name', $validated['client'])->first();
+    $supplier = Vendor::where('name', $validated['supplier'])->first();
+
+    $date = date_create($validated['deliveryDate']);
+    $count = InboundDelivery::where('deliveryDate', '=', $validated['deliveryDate'])->count();
+    $inboundDelivery->inboundNo = date_format($date, "Ymd") . $count + 1000;
+
+    if ($client) {
+      $inboundDelivery->client()->associate($client);
+    }
+    $inboundDelivery->supplier()->associate($supplier);
+    $inboundDelivery->save();
+
+    $reqProducts = $request->input('products');
+    $productIds = Arr::pluck($reqProducts, 'id');
+    $products = Product::whereIn('id', $productIds)->get();
+    $productsQuantity = $this->transformProduct($reqProducts, $products);
+
+    $inboundDelivery->products()->attach($productsQuantity);
+    $inboundDelivery->save();
+
+    return Redirect::route('inbound.delivery.index');
   }
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
   public function show($id)
   {
+    $inbound = InboundDelivery::where("id", $id)->with(['client:id,name', 'supplier:id,name', 'products:id'])->firstOrFail();
+    $products = $inbound->products->map->pivot;
+
+    $inbound = $inbound->toArray();
+    $inbound['products'] = $products->toArray();
+
     return Inertia::render('Inbound/InboundDelivery/Create', [
-      "inbound" => InboundDelivery::where("id", $id)->first()
+      "inbound" =>  $inbound,
+      "can" => [
+        'edit_InboundDelivery' => $inbound['status'] === 'OPEN'
+      ]
     ]);
   }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function update(Request $request, $id)
+  public function update(Request $request, InboundDelivery $inboundDelivery)
   {
-    //
+    $validated = $request->validate([
+      'client' => 'sometimes|exists:vendors,name',
+      'supplier' => 'required|exists:vendors,name',
+      'deliveryDate' => 'required',
+    ]);
+
+    $client = Vendor::where('name', $validated['client'])->first();
+    $supplier = Vendor::where('name', $validated['supplier'])->first();
+
+    if ($client) {
+      $inboundDelivery->client()->associate($client);
+    }
+    $inboundDelivery->supplier()->associate($supplier);
+
+    $inboundDelivery->update($validated);
+
+    return Redirect::route('inbound.delivery.index');
   }
 
   /**
@@ -83,6 +128,22 @@ class InboundDeliveryController extends Controller
   {
     $ids = explode(',', $id);
     InboundDelivery::whereIn('id', $ids)->delete();
-    return Redirect::route('outbound.delivery.index');
+    return Redirect::route('inbound.delivery.index');
+  }
+
+
+  protected function transformProduct($reqProducts, $products)
+  {
+    $productsQuantity = [];
+    $quantityById = Arr::pluck($reqProducts, 'quantity', 'id');
+
+    foreach ($products as $product) {
+      $productsQuantity[$product->id] = [
+        'name' => $product->name,
+        'baseUom' => $product->baseUom,
+        'description' => $product->description,
+        'quantity' => $quantityById[$product->id]
+      ];
+    }
   }
 }

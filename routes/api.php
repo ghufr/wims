@@ -22,9 +22,12 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::middleware('api')->post('login', [ApiAuthController::class, 'login'])->name('api.login');
+Route::post('auth/login', [ApiAuthController::class, 'login'])->name('api.auth.login');
 
-Route::middleware('auth:api')->name('api.')->group(function () {
+Route::middleware('auth:sanctum')->name('api.')->group(function () {
+  Route::post('auth/refresh', [ApiAuthController::class, 'refresh'])->name('auth.refresh');
+  Route::post('auth/logout', [ApiAuthController::class, 'logout'])->name('auth.logout');
+
   Route::name('master.')->prefix('master')->group(function () {
     Route::apiResources(
       [

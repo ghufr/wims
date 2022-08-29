@@ -12,6 +12,10 @@ import {
 import { Head, Link } from "@inertiajs/inertia-react";
 import NavLink from "@/Components/NavLink";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
 const renderMenu = (menu) => {
   if (menu.children) {
     return (
@@ -125,43 +129,45 @@ export default function Authenticated({
   ];
 
   return (
-    <div className="flex h-full min-h-screen flex-row bg-gray-100">
-      <Head>
-        <title>{title}</title>
-      </Head>
-      <aside
-        className="hidden md:block md:max-w-xs w-full min-h-screen"
-        aria-label="Sidebar"
-      >
-        <div className="h-full bg-white border-r border-gray-200">
-          <div className="relative flex flex-col h-full justify-between">
-            <div className="h-full max-h-screen min-h-screen pb-16 overflow-y-auto py-4 px-4">
-              <nav>
-                <ul className="space-y-1">{menus.map(renderMenu)}</ul>
-              </nav>
-            </div>
-            <div className="absolute bottom-0 w-full flex justify-between items-center bg-gray-50 p-4">
-              <p className="font-medium text-sm">{user.name}</p>
-              <Link href={route("logout")} method="post" as="div">
-                <Button outline>Logout</Button>
-              </Link>
+    <QueryClientProvider client={queryClient}>
+      <div className="flex h-full min-h-screen flex-row bg-gray-100">
+        <Head>
+          <title>{title}</title>
+        </Head>
+        <aside
+          className="hidden md:block md:max-w-xs w-full min-h-screen"
+          aria-label="Sidebar"
+        >
+          <div className="h-full bg-white border-r border-gray-200">
+            <div className="relative flex flex-col h-full justify-between">
+              <div className="h-full max-h-screen min-h-screen pb-16 overflow-y-auto py-4 px-4">
+                <nav>
+                  <ul className="space-y-1">{menus.map(renderMenu)}</ul>
+                </nav>
+              </div>
+              <div className="absolute bottom-0 w-full flex justify-between items-center bg-gray-50 p-4">
+                <p className="font-medium text-sm">{user.name}</p>
+                <Link href={route("logout")} method="post" as="div">
+                  <Button outline>Logout</Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      <main className="w-full">
-        <nav className="md:hidden bg-gray-200 py-2">
-          <ul className="flex space-x-4">{menus.map(renderMenu)}</ul>
-        </nav>
-        <div className="p-2 md:p-6">
-          <div className="mb-4">
-            <h1 className="text-xl font-bold">{title}</h1>
-            <p className="text-gray-500 font-medium">{description || " "}</p>
+        <main className="w-full">
+          <nav className="md:hidden bg-gray-200 py-2">
+            <ul className="flex space-x-4">{menus.map(renderMenu)}</ul>
+          </nav>
+          <div className="p-2 md:p-6">
+            <div className="mb-4">
+              <h1 className="text-xl font-bold">{title}</h1>
+              <p className="text-gray-500 font-medium">{description || " "}</p>
+            </div>
+            <div>{children}</div>
           </div>
-          <div>{children}</div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </QueryClientProvider>
   );
 }

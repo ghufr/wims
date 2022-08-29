@@ -12,16 +12,18 @@ import Checkbox from "@/Components/Checkbox";
 import useCsrf from "@/Hooks/useCsrf";
 import useItems from "@/Hooks/useItems";
 
-const InboundCreate = ({ inbound = {}, can = {} }) => {
+const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
   useCsrf();
   const defaultValues = {
-    inboundNo: inbound.inboundNo || "",
-    deliveryDate: inbound.deliveryDate || "",
-    status: inbound.status || "",
-    client: (inbound.client && inbound.client.name) || "",
-    supplier: (inbound.supplier && inbound.supplier.name) || "",
-    products: inbound.products || [{}],
+    inboundNo: receipt.inboundNo || "",
+    grNo: receipt.grNo || "",
+    grDate: receipt.grDate || "",
+    client: (receipt.client && receipt.client.name) || "",
+    supplier: (receipt.supplier && receipt.supplier.name) || "",
+    products: receipt.products || [{}],
   };
+
+  console.log(receipt);
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -39,10 +41,10 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
     e.preventDefault();
     setData("products", items);
 
-    if (inbound.id) {
-      put(route("inbound.delivery.update", { id: inbound.id }));
+    if (receipt.id) {
+      put(route("inbound.receipt.update", { id: receipt.id }));
     } else {
-      post(route("inbound.delivery.store"));
+      post(route("inbound.receipt.store"));
     }
   }
 
@@ -53,19 +55,37 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
           <div>
             <div className="flex items-start mb-4">
               <div className="w-1/2">
-                <Label forInput="inboundNo">Inb. Delivery No</Label>
+                <Label forInput="inboundNo">Inb. Deliv. No</Label>
                 <InputError message={errors.inboundNo} />
               </div>
-              <Input
-                type="text"
-                name="inboundNo"
-                id="inboundNo"
-                value={data.inboundNo}
-                onChange={handleChange}
-                disabled={true}
-              />
+              <div className="w-full">
+                <Input
+                  type="text"
+                  name="inboundNo"
+                  id="inboundNo"
+                  value={data.inboundNo}
+                  onChange={handleChange}
+                  disabled={receipt.id || !can.edit_GoodsReceipt}
+                />
+              </div>
             </div>
             <div className="flex items-start mb-4">
+              <div className="w-1/2">
+                <Label forInput="grNo">GR. No</Label>
+                <InputError message={errors.grNo} />
+              </div>
+              <div className="w-full">
+                <Input
+                  type="text"
+                  name="grNo"
+                  id="grNo"
+                  value={data.grNo}
+                  onChange={handleChange}
+                  disabled={receipt.id || !can.edit_GoodsReceipt}
+                />
+              </div>
+            </div>
+            <div className="flex mb-4">
               <div className="w-1/2">
                 <Label forInput="client">Client Name</Label>
                 <InputError message={errors.client} />
@@ -78,10 +98,10 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                 value={data.client}
                 onChange={handleChange}
                 onFinish={(val) => setData("client", val.name)}
-                disabled={!can.edit_InboundDelivery}
+                disabled={!can.edit_GoodsReceipt}
               />
             </div>
-            <div className="flex items-start mb-4">
+            <div className="flex mb-4">
               <div className="w-1/2">
                 <Label forInput="supplier">Supplier Name</Label>
                 <InputError message={errors.supplier} />
@@ -94,33 +114,32 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                 value={data.supplier}
                 onChange={handleChange}
                 onFinish={(val) => setData("supplier", val.name)}
-                disabled={!can.edit_InboundDelivery}
+                disabled={!can.edit_GoodsReceipt}
               />
             </div>
             <div className="flex mb-4">
               <div className="w-1/2">
-                <Label forInput="deliveryDate">Inb. Delivery Date</Label>
-                <InputError message={errors.deliveryDate} />
+                <Label forInput="grDate">GR. Date</Label>
+                <InputError message={errors.grDate} />
               </div>
               <div className="w-full">
                 <Input
                   type="date"
-                  name="deliveryDate"
-                  id="deliveryDate"
+                  name="grDate"
+                  id="grDate"
                   onChange={handleChange}
-                  value={data.deliveryDate}
-                  disabled={!can.edit_InboundDelivery}
+                  value={data.grDate}
+                  disabled={!can.edit_GoodsReceipt}
                 />
               </div>
             </div>
           </div>
-          <div></div>
         </div>
 
         <hr className="mb-4" />
 
         <h4 className="font-medium text-lg mb-2">Product List</h4>
-        {can.edit_InboundDelivery && (
+        {can.edit_GoodsReceipt && (
           <div className="flex space-x-4 mb-4">
             <Button onClick={addItem}>Add</Button>
             {selectedCount > 0 && (
@@ -148,7 +167,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     <label htmlFor={`no-${i}`} className="mr-1">
                       {i + 1}
                     </label>
-                    {can.edit_InboundDelivery && (
+                    {can.edit_GoodsReceipt && (
                       <Checkbox
                         id={`no-${i}`}
                         checked={item.selected}
@@ -168,7 +187,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     id={`products[${i}]`}
                     resource="Product"
                     value={item.name}
-                    disabled={!can.edit_InboundDelivery}
+                    disabled={!can.edit_GoodsReceipt}
                     onChange={(e) =>
                       updateItem(i, { ...item, name: e.target.value })
                     }
@@ -190,7 +209,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     type="number"
                     min={1}
                     value={item.quantity || 1}
-                    disabled={!item.description || !can.edit_InboundDelivery}
+                    disabled={!item.description || !can.edit_GoodsReceipt}
                     onChange={(e) => {
                       updateItem(i, { ...item, quantity: e.target.value });
                     }}
@@ -209,10 +228,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={processing || !can.edit_InboundDelivery}
-          >
+          <Button type="submit" disabled={processing || !can.edit_GoodsReceipt}>
             Save
           </Button>
         </div>
@@ -221,14 +237,16 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
   );
 };
 
-InboundCreate.layout = (page) => (
+GoodsReceiptCreate.layout = (page) => (
   <Authenticated
-    title="Inbounds"
-    description={page.props.inbound ? "Inbound Details" : "Create new Inbound"}
+    title="Goods Receipts"
+    description={
+      page.props.receipt ? "Goods Receipt Details" : "Create new Goods Receipt"
+    }
     user={page.props.auth.user}
   >
     {page}
   </Authenticated>
 );
 
-export default InboundCreate;
+export default GoodsReceiptCreate;

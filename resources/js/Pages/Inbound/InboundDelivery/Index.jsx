@@ -3,11 +3,11 @@ import Authenticated from "@/Layouts/Authenticated";
 
 import { Link } from "@inertiajs/inertia-react";
 import Button from "@/Components/Button";
-import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
+import useDelete from "@/Hooks/useDelete";
 
-const InboundIndex = ({ delivery }) => {
+const InboundIndex = ({ inbounds }) => {
   const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
   const columns = [
     {
@@ -20,11 +20,13 @@ const InboundIndex = ({ delivery }) => {
     },
     {
       name: "Supplier",
-      selector: "address",
+      selector: "supplier",
+      format: (val) => val.name,
     },
     {
       name: "Client",
       selector: "client",
+      format: (val) => val.name,
     },
     {
       name: "Status",
@@ -41,14 +43,9 @@ const InboundIndex = ({ delivery }) => {
     },
   ];
 
-  function handleDelete(id) {
-    Inertia.delete(route("inbound.delivery.destroy", { id }));
-  }
-
-  function handleMassDelete(ids = []) {
-    if (ids.length === 0) return;
-    Inertia.delete(route("inbound.delivery.destroy", { id: ids.join(",") }));
-  }
+  const { handleDelete, handleMassDelete } = useDelete(
+    "inbound.delivery.destroy"
+  );
 
   return (
     <div>
@@ -67,7 +64,7 @@ const InboundIndex = ({ delivery }) => {
 
       <Table
         columns={columns}
-        data={delivery}
+        data={inbounds}
         selectableRows
         onSelectedRowsChange={(item) => onSelectChange(item.id)}
         onSelectAll={setSelect}

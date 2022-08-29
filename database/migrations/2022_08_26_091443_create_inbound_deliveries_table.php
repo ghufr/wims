@@ -6,26 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
-    {
-        Schema::create('inbound_deliveries', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+  /**
+   * Run the migrations.
+   *
+   * @return void
+   */
+  public function up()
+  {
+    Schema::create('inbound_deliveries', function (Blueprint $table) {
+      $table->id();
+      $table->string('inboundNo')->unique();
+      $table->string('status')->default('OPEN');
+      $table->date('deliveryDate');
+      $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();
+      $table->foreignId('supplier_id')->constrained('vendors')->restrictOnDelete();
+      $table->timestamps();
+    });
+  }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('inbound_deliveries');
-    }
+  /**
+   * Reverse the migrations.
+   *
+   * @return void
+   */
+  public function down()
+  {
+    Schema::dropIfExists('inbound_delivery_product');
+    Schema::dropIfExists('inbound_deliveries');
+  }
 };

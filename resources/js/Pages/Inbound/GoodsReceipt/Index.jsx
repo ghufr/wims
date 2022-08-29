@@ -3,36 +3,43 @@ import Authenticated from "@/Layouts/Authenticated";
 
 import { Link } from "@inertiajs/inertia-react";
 import Button from "@/Components/Button";
-import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
+import useDelete from "@/Hooks/useDelete";
 
-const CustomerIndex = ({ customers }) => {
+const GoodsReceiptIndex = ({ receipts }) => {
   const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
   const columns = [
     {
-      name: "Name",
-      selector: "name",
+      name: "GR. No.",
+      selector: "grNo",
     },
     {
-      name: "Description",
-      selector: "description",
+      name: "Inb. No.",
+      selector: "inboundNo",
     },
     {
-      name: "Address",
-      selector: "address",
+      name: "Warehouse",
+      selector: "warehouse",
+      format: (val) => val && val.name,
     },
     {
-      name: "Address 2",
-      selector: "address2",
+      name: "Reference",
+      selector: "reference",
     },
     {
-      name: "City",
-      selector: "city",
+      name: "GR Date",
+      selector: "grDate",
     },
     {
-      name: "Postal",
-      selector: "postalCode",
+      name: "Supplier",
+      selector: "supplier",
+      format: (val) => val && val.name,
+    },
+    {
+      name: "Client",
+      selector: "client",
+      format: (val) => val && val.name,
     },
     {
       name: "Updated At",
@@ -45,21 +52,16 @@ const CustomerIndex = ({ customers }) => {
     },
   ];
 
-  function handleDelete(id) {
-    Inertia.delete(route("master.customers.destroy", { id }));
-  }
-
-  function handleMassDelete(ids = []) {
-    if (ids.length === 0) return;
-    Inertia.delete(route("master.customers.destroy", { id: ids.join(",") }));
-  }
+  const { handleDelete, handleMassDelete } = useDelete(
+    "inbound.receipt.destroy"
+  );
 
   return (
     <div>
       <div className="mb-4">
         <div className="flex space-x-3 items-center text-gray-500">
-          <Link href={route("master.customers.create")}>
-            <Button>Create Customer</Button>
+          <Link href={route("inbound.receipt.create")}>
+            <Button>Create Goods Receipt</Button>
           </Link>
           {isSelected && (
             <Button outline onClick={() => handleMassDelete(select)}>
@@ -71,22 +73,22 @@ const CustomerIndex = ({ customers }) => {
 
       <Table
         columns={columns}
-        data={customers}
+        data={receipts}
         selectableRows
         onSelectedRowsChange={(item) => onSelectChange(item.id)}
         onSelectAll={setSelect}
         selectedRows={select}
-        rowEdit={(row) => route("master.customers.show", { id: row.id })}
+        rowEdit={(row) => route("inbound.receipt.show", { id: row.id })}
         rowDelete={(row) => handleDelete(row.id)}
       />
     </div>
   );
 };
 
-CustomerIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Customers">
+GoodsReceiptIndex.layout = (page) => (
+  <Authenticated user={page.props.auth.user} title="Goods Receipts">
     {page}
   </Authenticated>
 );
 
-export default CustomerIndex;
+export default GoodsReceiptIndex;

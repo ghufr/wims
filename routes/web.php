@@ -29,13 +29,23 @@ Route::get('/', [DashboardController::class, 'index'])->middleware(['auth'])->na
 
 
 Route::prefix('inbound')->name('inbound.')->middleware(['auth'])->group(function () {
-  Route::resource('delivery', InboundDeliveryController::class);
-  Route::resource('receipt', GoodsReceiptController::class);
+  Route::resources(
+    [
+      'delivery' => InboundDeliveryController::class,
+      'receipt' => GoodsReceiptController::class
+    ],
+    ['except' => ['edit']]
+  );
 });
 
 Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(function () {
-  Route::resource('delivery', OutboundDeliveryController::class);
-  Route::resource('order', OrderDeliveryController::class);
+  Route::resources(
+    [
+      'delivery' => OutboundDeliveryController::class,
+      'order' => OrderDeliveryController::class
+    ],
+    ['except' => ['edit']]
+  );
 });
 
 
@@ -50,7 +60,7 @@ Route::prefix('master')->name('master.')->middleware(['auth'])->group(function (
       'locations' => LocationController::class,
       'users' => UserController::class
     ],
-    ['only' => ['index', 'show', 'create', 'store', 'update', 'destroy']]
+    ['except' => ['edit']]
   );
 });
 

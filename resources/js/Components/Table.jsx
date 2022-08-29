@@ -47,7 +47,7 @@ const Table = ({
         </thead>
         <tbody className="divide-y divide-gray-100">
           {data.map((row, i) => (
-            <tr key={i}>
+            <tr key={i} className="transition-colors hover:bg-gray-100">
               {selectableRows && (
                 <td className=" p-1 text-center">
                   <Checkbox

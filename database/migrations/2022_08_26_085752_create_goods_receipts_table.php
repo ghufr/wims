@@ -6,26 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
-    {
-        Schema::create('goods_receipts', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+  /**
+   * Run the migrations.
+   *
+   * @return void
+   */
+  public function up()
+  {
+    Schema::create('goods_receipts', function (Blueprint $table) {
+      $table->id();
+      $table->string('grNo')->unique();
+      $table->string('inboundNo')->nullable();
+      $table->string('reference');
+      $table->date('grDate');
+      $table->foreignId('warehouse_id')->constrained('warehouses')->restrictOnDelete();
+      $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();
+      $table->foreignId('supplier_id')->constrained('vendors')->restrictOnDelete();
+      $table->timestamps();
+    });
+  }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('goods_receipts');
-    }
+  /**
+   * Reverse the migrations.
+   *
+   * @return void
+   */
+  public function down()
+  {
+    Schema::dropIfExists('goods_receipts');
+  }
 };

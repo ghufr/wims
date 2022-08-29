@@ -43,16 +43,20 @@ class RolesAndPermissionsSeeder extends Seeder
     $adminRole = Role::create(['name' => 'super-admin']);
     $adminRole->givePermissionTo(Permission::all());
 
+    $staffRole = Role::create(['name' => 'staff']);
+    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_OrderDelivery']);
+
+
     $admin = User::factory()->create([
       'name' => 'Ghufron',
       'email' => 'ghufronfr@gmail.com',
       'password' => Hash::make('admin123')
     ]);
 
-    $users = User::factory()->count(5)->create();
+    $users = User::factory(5)->create();
 
     collect($users)->map(function ($user) {
-      $user->givePermissionTo(['create_Receipt', 'create_Delivery']);
+      $user->assignRole('staff');
     });
 
     $admin->assignRole('super-admin');

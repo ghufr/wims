@@ -10,26 +10,28 @@ class InboundDelivery extends Model
   use HasFactory;
 
   protected $fillable = [
-    'quantity',
+    'inboundNo',
+    'deliveryDate',
+    'status',
   ];
 
   public function supplier()
   {
-    return $this->hasOne(Vendor::class);
+    return $this->belongsTo(Vendor::class, 'supplier_id', 'id');
   }
 
   public function client()
   {
-    return $this->hasOne(Customer::class);
+    return $this->belongsTo(Vendor::class, 'client_id', 'id');
   }
 
   public function products()
   {
-    return $this->hasMany(Product::class);
-  }
-
-  public function receipts()
-  {
-    return $this->hasMany(GoodsReceipt::class);
+    return $this->belongsToMany(Product::class)->withPivot([
+      'name',
+      'description',
+      'baseUom',
+      'quantity'
+    ]);
   }
 }

@@ -3,57 +3,36 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class ApiAuthController extends Controller
 {
   public function login(Request $request)
   {
     $request->validate([
-      'email' => 'required|string|email',
-      'password' => 'required|string',
+      'email' => 'required|email',
+      'password' => 'required'
     ]);
-    $credentials = $request->only('email', 'password');
 
-    $token = Auth::guard('api')->attempt($credentials);
+    $user = User::where('email', $request->email)->first();
 
-    if (!$token) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'Unauthorized',
-      ], 401);
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      throw ValidationException::withMessages([
+        'email' => ['The provided credentials are incorrect.']
+      ]);
     }
-
-    $user = Auth::user();
     return response()->json([
-      'status' => 'success',
-      'user' => $user,
-      'authorisation' => [
-        'token' => $token,
-        'type' => 'bearer',
-      ]
+      'token' => $user->createToken($user->name)->plainTextToken
     ]);
+    // return $user->createToken()->plainTextToken;
   }
 
   public function logout()
   {
-    Auth::logout();
-    return response()->json([
-      'status' => 'success',
-      'message' => 'Successfully logged out',
-    ]);
-  }
-
-  public function refresh()
-  {
-    return response()->json([
-      'status' => 'success',
-      'user' => Auth::user(),
-      'authorisation' => [
-        'token' => Auth::refresh(),
-        'type' => 'bearer',
-      ]
-    ]);
+    auth()->user()->tokens()->delete();
   }
 }

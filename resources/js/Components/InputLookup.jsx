@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
@@ -8,6 +8,21 @@ import Input from "./Input";
 import ButtonIcon from "./ButtonIcon";
 import axios from "axios";
 import Checkbox from "./Checkbox";
+import { useQuery } from "@tanstack/react-query";
+
+const makeRequest = async (request) => {
+  const token = window.localStorage.getItem("uhuyy");
+  if (!token) return [];
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+  return request({ headers, withCredentials: true })
+    .then((res) => res.data)
+    .catch(() => {
+      // window.history.replace("/login");
+    });
+};
 
 export default function InputLookup({
   resource,
@@ -17,34 +32,16 @@ export default function InputLookup({
   value = "",
   onFinish,
   onChange,
+  disabled = false,
 }) {
   const [_value, setValue] = useState({});
-  const [list, setList] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && endpoint) {
-      // axios
-      //   .get("/sanctum/csrf-cookie", { withCredentials: true })
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   });
-
-      const token = window.localStorage.getItem("uhuyy");
-      if (!token) return;
-
-      axios
-        .get(endpoint, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          setList(res.data);
-        })
-        .catch((err) => {});
-    }
-  }, [isOpen]);
+  const { error, data } = useQuery(
+    [endpoint],
+    () => makeRequest((options) => axios.get(endpoint, options)),
+    { enabled: isOpen, initialData: [] }
+  );
 
   function onEnter(e) {
     if (e.key === "Enter") {
@@ -69,16 +66,19 @@ export default function InputLookup({
           onChange={onChange}
           onKeyDown={onEnter}
           value={value}
+          disabled={disabled}
           uppercase
         />
-        <ButtonIcon
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="absolute right-2.5 bottom-1"
-          tabIndex={-1}
-        >
-          <HiOutlineSearch />
-        </ButtonIcon>
+        {!disabled && (
+          <ButtonIcon
+            type="button"
+            onClick={() => setIsOpen(true)}
+            className="absolute right-2.5 bottom-1"
+            tabIndex={-1}
+          >
+            <HiOutlineSearch />
+          </ButtonIcon>
+        )}
       </div>
       <Transition appear show={isOpen} as={Fragment}>
         <Dialog
@@ -126,7 +126,9 @@ export default function InputLookup({
                         </tr>
                       </thead>
                       <tbody>
-                        {list.map((item, i) => (
+                        {error && <p>{error.message}</p>}
+
+                        {data.map((item, i) => (
                           <tr
                             key={i}
                             className="hover:bg-gray-100 cursor-pointer"

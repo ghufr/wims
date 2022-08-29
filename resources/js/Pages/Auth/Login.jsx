@@ -32,9 +32,9 @@ export default function Login({ status, canResetPassword }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    // get jwt
+    await axios.get("/sanctum/csrf-cookie");
     const res = await axios
-      .post(route("api.login"), data)
+      .post(route("api.auth.login"), data, { withCredentials: true })
       .then((res) => res.data)
       .catch(() => null);
 
@@ -42,7 +42,8 @@ export default function Login({ status, canResetPassword }) {
       setError("email", "These credentials do not match our records.");
       return;
     }
-    window.localStorage.setItem("uhuyy", res.authorisation.token);
+
+    window.localStorage.setItem("uhuyy", res.token);
 
     post(route("login"));
   };
@@ -113,7 +114,7 @@ export default function Login({ status, canResetPassword }) {
               </Link>
             )}
 
-            <Button type="submit" className="ml-4" processing={processing}>
+            <Button type="submit" className="ml-4" disabled={processing}>
               Log in
             </Button>
           </div>
