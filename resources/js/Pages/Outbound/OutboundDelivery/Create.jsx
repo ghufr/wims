@@ -12,6 +12,7 @@ import Checkbox from "@/Components/Checkbox";
 import useCsrf from "@/Hooks/useCsrf";
 import useItems from "@/Hooks/useItems";
 import TextArea from "@/Components/TextArea";
+import usePermission from "@/Hooks/usePermission";
 
 const OutboundCreate = ({ outbound = {}, can = {} }) => {
   useCsrf();
@@ -25,6 +26,9 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
     destination: outbound.destination || {},
     products: outbound.products || [{}],
   };
+
+  const permission = usePermission(can, "OutboundDelivery");
+  const disabled = outbound.id ? !permission.update : !permission.create;
 
   const { data, setData, post, put, processing, errors, transform } =
     useForm(defaultValues);
@@ -88,7 +92,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                 value={data.client.name}
                 onChange={handleChange}
                 onFinish={(val) => setData("client", val)}
-                disabled={!can.edit_OutboundDelivery}
+                disabled={disabled}
               />
             </div>
             <div className="flex items-start mb-4">
@@ -106,7 +110,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                     value={data.origin.name}
                     onChange={handleChange}
                     onFinish={(val) => setData("origin", val)}
-                    disabled={!can.edit_OutboundDelivery}
+                    disabled={disabled}
                   />
                 </div>
                 <TextArea disabled={true} value={data.origin.address} />
@@ -127,7 +131,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                     value={data.destination.name}
                     onChange={handleChange}
                     onFinish={(val) => setData("destination", val)}
-                    disabled={!can.edit_OutboundDelivery}
+                    disabled={disabled}
                   />
                 </div>
                 <TextArea disabled={true} value={data.destination.address} />
@@ -145,7 +149,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                   id="deliveryDate"
                   onChange={handleChange}
                   value={data.deliveryDate}
-                  disabled={!can.edit_OutboundDelivery}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -156,7 +160,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
         <hr className="mb-4" />
 
         <h4 className="font-medium text-lg mb-2">Product List</h4>
-        {can.edit_OutboundDelivery && (
+        {can.update_OutboundDelivery && (
           <div className="flex space-x-4 mb-4">
             <Button onClick={addItem}>Add</Button>
             {selectedCount > 0 && (
@@ -184,7 +188,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                     <label htmlFor={`no-${i}`} className="mr-1">
                       {i + 1}
                     </label>
-                    {can.edit_OutboundDelivery && (
+                    {can.update_OutboundDelivery && (
                       <Checkbox
                         id={`no-${i}`}
                         checked={item.selected}
@@ -204,7 +208,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                     id={`products[${i}]`}
                     resource="Product"
                     value={item.name}
-                    disabled={!can.edit_OutboundDelivery}
+                    disabled={disabled}
                     onChange={(e) =>
                       updateItem(i, { ...item, name: e.target.value })
                     }
@@ -226,7 +230,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
                     type="number"
                     min={1}
                     value={item.quantity || 1}
-                    disabled={!item.description || !can.edit_OutboundDelivery}
+                    disabled={!item.description || disabled}
                     onChange={(e) => {
                       updateItem(i, {
                         ...item,
@@ -248,10 +252,7 @@ const OutboundCreate = ({ outbound = {}, can = {} }) => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={processing || !can.edit_OutboundDelivery}
-          >
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -266,7 +267,6 @@ OutboundCreate.layout = (page) => (
     description={
       page.props.outbound ? "Outbound Details" : "Create new Outbound"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

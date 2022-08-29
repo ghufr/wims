@@ -9,10 +9,11 @@ import InputError from "@/Components/InputError";
 import Checkbox from "@/Components/Checkbox";
 import Select from "@/Components/Select";
 import useSelect from "@/Hooks/useSelect";
+import usePermission from "@/Hooks/usePermission";
 
 const methods = ["View", "ViewAll", "Create", "Delete", "Update"];
 
-const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
+const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
   const { data, setData, post, put, processing, errors } = useForm({
     name: user.name || "",
     email: user.email || "",
@@ -20,7 +21,10 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
     role: "",
   });
 
-  const { select, isSelected, onSelectChange } = useSelect([]);
+  const permission = usePermission(can, "User");
+  const disabled = user.id ? !permission.update : !permission.create;
+
+  const { select, onSelectChange } = useSelect([]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -53,7 +57,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
                 value={data.email}
                 name="email"
                 id="email"
-                disabled={user.id}
+                disabled={user.id || disabled}
               ></Input>
             </div>
             <div className="flex justify-between items-start mb-3">
@@ -69,6 +73,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
                 name="name"
                 id="name"
                 required
+                disabled={disabled}
               />
             </div>
 
@@ -85,6 +90,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
                 name="password"
                 id="password"
                 placeholder={user.id ? "(Unchanged)" : ""}
+                disabled={disabled}
               />
             </div>
             <div className="flex justify-between items-start mb-3">
@@ -103,6 +109,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
                   value: name,
                   label: name,
                 }))}
+                disabled={disabled}
               />
             </div>
           </div>
@@ -116,7 +123,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [] }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -172,7 +179,6 @@ UserCreate.layout = (page) => (
   <Authenticated
     title="Users"
     description={page.props.user ? "User Details" : "Create new User"}
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

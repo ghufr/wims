@@ -59,7 +59,7 @@ class InboundDeliveryPolicy
    */
   public function update(User $user, InboundDelivery $inbound)
   {
-    if ($user->can('edit_InboundDelivery')) {
+    if ($user->can('update_InboundDelivery')) {
       return true;
     }
   }

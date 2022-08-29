@@ -59,7 +59,7 @@ class OutboundDeliveryPolicy
    */
   public function update(User $user, OutboundDelivery $outbound)
   {
-    if ($user->can('edit_OutboundDelivery')) {
+    if ($user->can('update_OutboundDelivery')) {
       return true;
     }
   }

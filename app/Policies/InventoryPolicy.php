@@ -59,7 +59,7 @@ class InventoryPolicy
    */
   public function update(User $user, Inventory $inventory)
   {
-    if ($user->can('edit_Inventory')) {
+    if ($user->can('update_Inventory')) {
       return true;
     }
   }

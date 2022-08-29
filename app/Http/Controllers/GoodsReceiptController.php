@@ -36,11 +36,7 @@ class GoodsReceiptController extends Controller
   {
     $this->authorize('create', GoodsReceipt::class);
 
-    return Inertia::render('Inbound/GoodsReceipt/Create', [
-      'can' => [
-        'edit_GoodsReceipt' => true
-      ]
-    ]);
+    return Inertia::render('Inbound/GoodsReceipt/Create');
   }
 
   /**
@@ -81,17 +77,11 @@ class GoodsReceiptController extends Controller
     $goodsReceipt->save();
   }
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function show($id)
+  public function show(GoodsReceipt $receipt)
   {
-    $this->authorize('view', GoodsReceipt::class);
+    $this->authorize('view', $receipt);
 
-    $receipt = GoodsReceipt::where('id', $id)->with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->firstOrFail();
+    $receipt = $receipt->with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->firstOrFail();
     $products = $receipt->products->map->pivot;
 
     $receipt = $receipt->toArray();
@@ -99,22 +89,13 @@ class GoodsReceiptController extends Controller
 
     return Inertia::render('Inbound/GoodsReceipt/Create', [
       'receipt' => $receipt,
-      'can' => [
-        'edit_GoodsReceipt' => true
-      ]
     ]);
   }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function update(Request $request, $id)
+
+  public function update(Request $request, GoodsReceipt $receipt)
   {
-    $this->authorize('update', GoodsReceipt::class);
+    $this->authorize('update', $receipt);
   }
 
   /**
@@ -125,7 +106,7 @@ class GoodsReceiptController extends Controller
    */
   public function destroy($id)
   {
-    $this->authorize('delete', GoodsReceipt::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     GoodsReceipt::whereIn('id', $ids)->delete();

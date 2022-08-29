@@ -59,7 +59,7 @@ class ProductPolicy
    */
   public function update(User $user, Product $product)
   {
-    if ($user->can('edit_Product')) {
+    if ($user->can('update_Product')) {
       return true;
     }
   }

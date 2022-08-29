@@ -49,9 +49,7 @@ const InventoryListIndex = ({ inventories }) => {
 };
 
 InventoryListIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Inventory List">
-    {page}
-  </Authenticated>
+  <Authenticated title="Inventory List">{page}</Authenticated>
 );
 
 export default InventoryListIndex;

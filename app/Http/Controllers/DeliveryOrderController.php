@@ -35,11 +35,7 @@ class DeliveryOrderController extends Controller
   {
     $this->authorize('create', DeliveryOrder::class);
 
-    return Inertia::render('Outbound/DeliveryOrder/Create', [
-      'can' => [
-        'edit_DeliveryOrder' => true,
-      ]
-    ]);
+    return Inertia::render('Outbound/DeliveryOrder/Create');
   }
 
   /**
@@ -60,59 +56,69 @@ class DeliveryOrderController extends Controller
       'destination' => 'required|exists:customers,id'
     ]);
 
-    $outboundDelivery = new DeliveryOrder($validated);
+    $order = new DeliveryOrder($validated);
 
     $count = DeliveryOrder::where('deliveryDate', '=', $validated['deliveryDate'])->count();
-    $outboundDelivery->doNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 4);
+    $order->doNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 4);
 
-    $outboundDelivery->client()->associate($validated['client']);
-    $outboundDelivery->origin()->associate($validated['origin']);
-    $outboundDelivery->destination()->associate($validated['destination']);
-    $outboundDelivery->save();
+    $order->client()->associate($validated['client']);
+    $order->origin()->associate($validated['origin']);
+    $order->destination()->associate($validated['destination']);
+    $order->save();
 
     $nProducts = $request->collect('products')->keyBy('id');
     $products = Product::whereIn('id', $nProducts->keys())->get();
     $nProducts = ProductService::transform($nProducts, $products);
 
-    $outboundDelivery->products()->attach($nProducts);
-    $outboundDelivery->save();
+    $order->products()->attach($nProducts);
+    $order->save();
 
     return Redirect::route('outbound.delivery.index');
   }
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function show($id)
+  public function show(DeliveryOrder $order)
   {
-    $this->authorize('view', DeliveryOrder::class);
+    $this->authorize('view', $order);
 
-    $order = DeliveryOrder::where('id', $id)->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
+    $order = $order->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
     $products = $order->products->map->pivot;
 
     $order = $order->toArray();
     $order['products'] = $products->toArray();
     return Inertia::render('Outbound/DeliveryOrder/Create', [
-      "order" => $order,
-      "can" => [
-        'edit_DeliveryOrder' => $order['reference'] != null
-      ]
+      "order" => $order
     ]);
   }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function update(Request $request, $id)
+  public function update(Request $request, DeliveryOrder $order)
   {
-    $this->authorize('update', DeliveryOrder::class);
+    $this->authorize('update', $order);
+
+    $validated = $request->validate([
+      'deliveryDate' => 'required|date',
+      'products' => 'required|array',
+      'client' => 'required|exists:customers,id',
+      'origin' => 'required|exists:warehouses,id',
+      'destination' => 'required|exists:customers,id'
+    ]);
+
+
+    $count = DeliveryOrder::where('deliveryDate', '=', $validated['deliveryDate'])->count();
+    $order->doNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 4);
+
+    $order->client()->associate($validated['client']);
+    $order->origin()->associate($validated['origin']);
+    $order->destination()->associate($validated['destination']);
+    $order->save();
+
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
+
+    $order->products()->attach($nProducts);
+    $order->save();
+
+    return Redirect::route('outbound.delivery.index');
   }
 
   /**
@@ -123,7 +129,7 @@ class DeliveryOrderController extends Controller
    */
   public function destroy($id)
   {
-    $this->authorize('delete', DeliveryOrder::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     DeliveryOrder::whereIn('id', $ids)->delete();

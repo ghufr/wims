@@ -59,7 +59,7 @@ class LocationPolicy
    */
   public function update(User $user, Location $location)
   {
-    if ($user->can('edit_Location')) {
+    if ($user->can('update_Location')) {
       return true;
     }
   }

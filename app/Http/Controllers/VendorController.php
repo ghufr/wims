@@ -43,18 +43,18 @@ class VendorController extends Controller
     return Redirect::route('master.vendors.index');
   }
 
-  public function show($id)
+  public function show(Vendor $vendor)
   {
-    $this->authorize('view', Vendor::class);
+    $this->authorize('view', $vendor);
 
     return Inertia::render('Master/Vendors/Create', [
-      "vendor" => Vendor::where("id", $id)->first()
+      "vendor" => $vendor
     ]);
   }
 
   public function update(Request $request, Vendor $vendor)
   {
-    $this->authorize('update', Vendor::class);
+    $this->authorize('update', $vendor);
 
     $validated = $request->validate([
       'name' => 'required|unique:vendors,name,' . $vendor->id,
@@ -73,7 +73,7 @@ class VendorController extends Controller
 
   public function destroy($id)
   {
-    $this->authorize('delete', Vendor::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     Vendor::whereIn('id', $ids)->delete();

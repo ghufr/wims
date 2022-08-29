@@ -7,7 +7,7 @@ import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import TextArea from "@/Components/TextArea";
 
-const VendorCreate = ({ vendor = {} }) => {
+const VendorCreate = ({ vendor = {}, can }) => {
   const defaultValues = {
     name: vendor.name || "",
     description: vendor.description || "",
@@ -18,6 +18,7 @@ const VendorCreate = ({ vendor = {} }) => {
     phone: vendor.phone || "",
   };
 
+  const disabled = can.update_Vendor == null;
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
 
@@ -55,6 +56,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 required
                 uppercase
                 noSpace
+                disabled={disabled}
               />
             </div>
 
@@ -70,6 +72,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 name="description"
                 id="description"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -85,6 +88,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 type="text"
                 name="address"
                 id="address"
+                disabled={disabled}
               />
             </div>
 
@@ -100,6 +104,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 type="text"
                 name="address2"
                 id="address2"
+                disabled={disabled}
               />
             </div>
           </div>
@@ -116,6 +121,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 name="city"
                 id="city"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -132,6 +138,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 id="postalCode"
                 type="number"
                 min={0}
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -147,6 +154,7 @@ const VendorCreate = ({ vendor = {} }) => {
                 name="phone"
                 id="phone"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
           </div>
@@ -160,7 +168,7 @@ const VendorCreate = ({ vendor = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -173,7 +181,6 @@ VendorCreate.layout = (page) => (
   <Authenticated
     title="Vendor"
     description={page.props.vendor ? "Vendor Details" : "Create new Vendor"}
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

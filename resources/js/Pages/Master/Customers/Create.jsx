@@ -6,8 +6,9 @@ import Label from "@/Components/Label";
 import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import TextArea from "@/Components/TextArea";
+import usePermission from "@/Hooks/usePermission";
 
-const CustomerCreate = ({ customer = {} }) => {
+const CustomerCreate = ({ customer = {}, can }) => {
   const defaultValues = {
     name: customer.name || "",
     description: customer.description || "",
@@ -17,6 +18,9 @@ const CustomerCreate = ({ customer = {} }) => {
     postalCode: customer.postalCode || "",
     phone: customer.phone || "",
   };
+
+  const permission = usePermission(can, "Customer");
+  const disabled = customer.id ? !permission.update : !permission.create;
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -55,6 +59,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 required
                 uppercase
                 noSpace
+                disabled={disabled}
               />
             </div>
 
@@ -70,6 +75,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 name="description"
                 id="description"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -85,6 +91,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 type="text"
                 name="address"
                 id="address"
+                disabled={disabled}
               />
             </div>
 
@@ -100,6 +107,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 type="text"
                 name="address2"
                 id="address2"
+                disabled={disabled}
               />
             </div>
           </div>
@@ -116,6 +124,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 name="city"
                 id="city"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -131,6 +140,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 name="postalCode"
                 id="postalCode"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -146,6 +156,7 @@ const CustomerCreate = ({ customer = {} }) => {
                 name="phone"
                 id="phone"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
           </div>
@@ -159,7 +170,7 @@ const CustomerCreate = ({ customer = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -174,7 +185,6 @@ CustomerCreate.layout = (page) => (
     description={
       page.props.customer ? "Customer Details" : "Create new Customer"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

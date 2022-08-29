@@ -12,6 +12,7 @@ import Checkbox from "@/Components/Checkbox";
 import useCsrf from "@/Hooks/useCsrf";
 import useItems from "@/Hooks/useItems";
 import TextArea from "@/Components/TextArea";
+import usePermission from "@/Hooks/usePermission";
 
 const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
   useCsrf();
@@ -26,7 +27,8 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
     products: order.products || [{}],
   };
 
-  console.log(order);
+  const permission = usePermission(can, "DeliveryOrder");
+  const disabled = order.id ? !permission.update : !permission.create;
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -68,7 +70,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                   id="outboundNo"
                   value={data.outboundNo}
                   onChange={handleChange}
-                  disabled={order.id || !can.edit_DeliveryOrder}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -101,7 +103,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                 value={data.client.name}
                 onChange={handleChange}
                 onFinish={(val) => setData("client", val)}
-                disabled={!can.edit_DeliveryOrder}
+                disabled={disabled}
               />
             </div>
             <div className="flex items-start mb-4">
@@ -119,7 +121,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                     value={data.origin.name}
                     onChange={handleChange}
                     onFinish={(val) => setData("origin", val)}
-                    disabled={!can.edit_DeliveryOrder}
+                    disabled={disabled}
                   />
                 </div>
                 <TextArea disabled={true} value={data.origin.address} />
@@ -140,7 +142,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                     value={data.destination.name}
                     onChange={handleChange}
                     onFinish={(val) => setData("destination", val)}
-                    disabled={!can.edit_DeliveryOrder}
+                    disabled={disabled}
                   />
                 </div>
                 <TextArea disabled={true} value={data.destination.address} />
@@ -158,7 +160,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                   id="grDate"
                   onChange={handleChange}
                   value={data.grDate}
-                  disabled={!can.edit_DeliveryOrder}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -168,7 +170,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
         <hr className="mb-4" />
 
         <h4 className="font-medium text-lg mb-2">Product List</h4>
-        {can.edit_DeliveryOrder && (
+        {can.update_DeliveryOrder && (
           <div className="flex space-x-4 mb-4">
             <Button onClick={addItem}>Add</Button>
             {selectedCount > 0 && (
@@ -196,7 +198,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                     <label htmlFor={`no-${i}`} className="mr-1">
                       {i + 1}
                     </label>
-                    {can.edit_DeliveryOrder && (
+                    {can.update_DeliveryOrder && (
                       <Checkbox
                         id={`no-${i}`}
                         checked={item.selected}
@@ -216,7 +218,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                     id={`products[${i}]`}
                     resource="Product"
                     value={item.name}
-                    disabled={!can.edit_DeliveryOrder}
+                    disabled={disabled}
                     onChange={(e) =>
                       updateItem(i, { ...item, name: e.target.value })
                     }
@@ -238,7 +240,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
                     type="number"
                     min={1}
                     value={item.quantity || 1}
-                    disabled={!item.description || !can.edit_DeliveryOrder}
+                    disabled={!item.description || disabled}
                     onChange={(e) => {
                       updateItem(i, { ...item, quantity: e.target.value });
                     }}
@@ -257,10 +259,7 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={processing || !can.edit_DeliveryOrder}
-          >
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -271,11 +270,10 @@ const DeliveryOrderCreate = ({ order = {}, can = {} }) => {
 
 DeliveryOrderCreate.layout = (page) => (
   <Authenticated
-    title="Goods Receipts"
+    title="Delivery Order"
     description={
-      page.props.order ? "Goods Receipt Details" : "Create new Goods Receipt"
+      page.props.order ? "Delivery Order Details" : "Create new Delivery Order"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

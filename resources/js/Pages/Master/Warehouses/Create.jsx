@@ -7,7 +7,7 @@ import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import TextArea from "@/Components/TextArea";
 
-const WarehouseCreate = ({ warehouse = {} }) => {
+const WarehouseCreate = ({ warehouse = {}, can }) => {
   const defaultValues = {
     name: warehouse.name || "",
     description: warehouse.description || "",
@@ -17,6 +17,8 @@ const WarehouseCreate = ({ warehouse = {} }) => {
     postalCode: warehouse.postalCode || "",
     phone: warehouse.phone || "",
   };
+
+  const disabled = can.update_Warehouse == null;
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -55,6 +57,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 required
                 uppercase
                 noSpace
+                disabled={disabled}
               />
             </div>
 
@@ -70,6 +73,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 name="description"
                 id="description"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -85,6 +89,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 type="text"
                 name="address"
                 id="address"
+                disabled={disabled}
               />
             </div>
 
@@ -100,6 +105,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 type="text"
                 name="address2"
                 id="address2"
+                disabled={disabled}
               />
             </div>
           </div>
@@ -116,6 +122,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 name="city"
                 id="city"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -131,6 +138,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 name="postalCode"
                 id="postalCode"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
 
@@ -146,6 +154,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
                 name="phone"
                 id="phone"
                 rows="2"
+                disabled={disabled}
               ></Input>
             </div>
           </div>
@@ -159,7 +168,7 @@ const WarehouseCreate = ({ warehouse = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -174,7 +183,6 @@ WarehouseCreate.layout = (page) => (
     description={
       page.props.warehouse ? "Warehouse Details" : "Create new Warehouse"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

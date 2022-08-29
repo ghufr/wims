@@ -3,9 +3,9 @@ import Authenticated from "@/Layouts/Authenticated";
 
 import { Link } from "@inertiajs/inertia-react";
 import Button from "@/Components/Button";
-import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
+import useDelete from "@/Hooks/useDelete";
 
 const CustomerIndex = ({ customers }) => {
   const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
@@ -45,14 +45,9 @@ const CustomerIndex = ({ customers }) => {
     },
   ];
 
-  function handleDelete(id) {
-    Inertia.delete(route("master.customers.destroy", { id }));
-  }
-
-  function handleMassDelete(ids = []) {
-    if (ids.length === 0) return;
-    Inertia.delete(route("master.customers.destroy", { id: ids.join(",") }));
-  }
+  const { handleDelete, handleMassDelete } = useDelete(
+    "master.customers.destroy"
+  );
 
   return (
     <div>
@@ -84,9 +79,7 @@ const CustomerIndex = ({ customers }) => {
 };
 
 CustomerIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Customers">
-    {page}
-  </Authenticated>
+  <Authenticated title="Customers">{page}</Authenticated>
 );
 
 export default CustomerIndex;

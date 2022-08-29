@@ -11,6 +11,7 @@ import InputError from "@/Components/InputError";
 import Checkbox from "@/Components/Checkbox";
 import useCsrf from "@/Hooks/useCsrf";
 import useItems from "@/Hooks/useItems";
+import usePermission from "@/Hooks/usePermission";
 
 const InboundCreate = ({ inbound = {}, can = {} }) => {
   useCsrf();
@@ -22,6 +23,9 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
     supplier: (inbound.supplier && inbound.supplier.name) || "",
     products: inbound.products || [{}],
   };
+
+  const permission = usePermission(can, "InboundDelivery");
+  const disabled = inbound.id ? !permission.update : !permission.create;
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -78,7 +82,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                 value={data.client}
                 onChange={handleChange}
                 onFinish={(val) => setData("client", val.name)}
-                disabled={!can.edit_InboundDelivery}
+                disabled={disabled}
               />
             </div>
             <div className="flex items-start mb-4">
@@ -94,7 +98,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                 value={data.supplier}
                 onChange={handleChange}
                 onFinish={(val) => setData("supplier", val.name)}
-                disabled={!can.edit_InboundDelivery}
+                disabled={disabled}
               />
             </div>
             <div className="flex mb-4">
@@ -109,7 +113,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                   id="deliveryDate"
                   onChange={handleChange}
                   value={data.deliveryDate}
-                  disabled={!can.edit_InboundDelivery}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -120,7 +124,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
         <hr className="mb-4" />
 
         <h4 className="font-medium text-lg mb-2">Product List</h4>
-        {can.edit_InboundDelivery && (
+        {can.update_InboundDelivery && (
           <div className="flex space-x-4 mb-4">
             <Button onClick={addItem}>Add</Button>
             {selectedCount > 0 && (
@@ -148,7 +152,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     <label htmlFor={`no-${i}`} className="mr-1">
                       {i + 1}
                     </label>
-                    {can.edit_InboundDelivery && (
+                    {can.update_InboundDelivery && (
                       <Checkbox
                         id={`no-${i}`}
                         checked={item.selected}
@@ -168,7 +172,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     id={`products[${i}]`}
                     resource="Product"
                     value={item.name}
-                    disabled={!can.edit_InboundDelivery}
+                    disabled={disabled}
                     onChange={(e) =>
                       updateItem(i, { ...item, name: e.target.value })
                     }
@@ -190,7 +194,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
                     type="number"
                     min={1}
                     value={item.quantity || 1}
-                    disabled={!item.description || !can.edit_InboundDelivery}
+                    disabled={!item.description || disabled}
                     onChange={(e) => {
                       updateItem(i, { ...item, quantity: e.target.value });
                     }}
@@ -209,10 +213,7 @@ const InboundCreate = ({ inbound = {}, can = {} }) => {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={processing || !can.edit_InboundDelivery}
-          >
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -225,7 +226,6 @@ InboundCreate.layout = (page) => (
   <Authenticated
     title="Inbounds"
     description={page.props.inbound ? "Inbound Details" : "Create new Inbound"}
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

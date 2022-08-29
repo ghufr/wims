@@ -7,8 +7,9 @@ import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import TextArea from "@/Components/TextArea";
 import Select from "@/Components/Select";
+import usePermission from "@/Hooks/usePermission";
 
-const ProductCreate = ({ product = {} }) => {
+const ProductCreate = ({ product = {}, can }) => {
   const { data, setData, post, put, processing, errors } = useForm({
     name: product.name || "",
     description: product.description || "",
@@ -17,6 +18,9 @@ const ProductCreate = ({ product = {} }) => {
     section: product.section || "FAST",
     type: product.type || "Frozen",
   });
+
+  const permission = usePermission(can, "Product");
+  const disabled = product.id ? !permission.update : !permission.create;
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -52,6 +56,7 @@ const ProductCreate = ({ product = {} }) => {
                 required
                 uppercase
                 noSpace
+                disabled={disabled}
               />
             </div>
 
@@ -67,6 +72,7 @@ const ProductCreate = ({ product = {} }) => {
                 name="description"
                 id="description"
                 rows="2"
+                disabled={disabled}
               ></TextArea>
             </div>
 
@@ -82,6 +88,7 @@ const ProductCreate = ({ product = {} }) => {
                 type="text"
                 name="baseEan"
                 id="baseEan"
+                disabled={disabled}
               />
             </div>
 
@@ -101,6 +108,7 @@ const ProductCreate = ({ product = {} }) => {
                   { value: "Lt", label: "Liter" },
                   { value: "Pcs", label: "Pcs" },
                 ]}
+                disabled={disabled}
               />
             </div>
           </div>
@@ -121,6 +129,7 @@ const ProductCreate = ({ product = {} }) => {
                   { value: "FAST", label: "FAST" },
                   { value: "SLOW", label: "SLOW" },
                 ]}
+                disabled={disabled}
               />
             </div>
 
@@ -142,6 +151,7 @@ const ProductCreate = ({ product = {} }) => {
                   { value: "Vegetable", label: "Vegetable" },
                   { value: "Beverage", label: "Beverage" },
                 ]}
+                disabled={disabled}
               ></Select>
             </div>
           </div>
@@ -155,7 +165,7 @@ const ProductCreate = ({ product = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -168,7 +178,6 @@ ProductCreate.layout = (page) => (
   <Authenticated
     title="Products"
     description={page.props.product ? "Product Details" : "Create new Product"}
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

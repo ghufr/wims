@@ -59,7 +59,7 @@ class CustomerPolicy
    */
   public function update(User $user, Customer $customer)
   {
-    if ($user->can('edit_Customer')) {
+    if ($user->can('update_Customer')) {
       return true;
     }
   }

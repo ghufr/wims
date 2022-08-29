@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 
 const renderMenu = (menu) => {
   if (menu.children) {
-    if (menu.children.filter((sub) => sub.show).length < 1) return;
+    if (menu.children.filter((sub) => sub.show) < 1) return;
     return (
       <Disclosure key={menu.name} as={"li"} defaultOpen={false}>
         <Disclosure.Button
@@ -46,7 +46,7 @@ const renderMenu = (menu) => {
     );
   }
 
-  if (!menu.show) return;
+  if (!menu.show) return null;
 
   return (
     <li key={menu.name}>
@@ -61,19 +61,14 @@ const renderMenu = (menu) => {
   );
 };
 
-export default function Authenticated({
-  user,
-  title = "",
-  description,
-  children,
-}) {
+export default function Authenticated({ title = "", description, children }) {
   const { props } = usePage();
 
-  function can(permission) {
-    return props.can[permission] != -1;
-  }
+  const user = props.auth.user;
 
-  console.log(props);
+  function can(permission) {
+    return props.can[permission] != null;
+  }
 
   const menus = [
     {
@@ -142,22 +137,22 @@ export default function Authenticated({
         {
           name: "Locations",
           href: "master.locations.index",
-          show: can("viewAll_Locations"),
+          show: can("viewAll_Location"),
         },
         {
           name: "Vendors",
           href: "master.vendors.index",
-          show: can("viewAll_Vendors"),
+          show: can("viewAll_Vendor"),
         },
         {
           name: "Customers",
           href: "master.customers.index",
-          show: can("viewAll_Customers"),
+          show: can("viewAll_Customer"),
         },
         {
           name: "Users",
           href: "master.users.index",
-          show: can("viewAll_Users"),
+          show: can("viewAll_User"),
         },
       ],
     },

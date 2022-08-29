@@ -59,7 +59,7 @@ class VendorPolicy
    */
   public function update(User $user, Vendor $vendor)
   {
-    if ($user->can('edit_Vendor')) {
+    if ($user->can('update_Vendor')) {
       return true;
     }
   }

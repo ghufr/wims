@@ -7,14 +7,18 @@ import { useForm } from "@inertiajs/inertia-react";
 import InputError from "@/Components/InputError";
 import Select from "@/Components/Select";
 import InputLookup from "@/Components/InputLookup";
+import usePermission from "@/Hooks/usePermission";
 
-const LocationCreate = ({ location = {} }) => {
+const LocationCreate = ({ location = {}, can }) => {
   const { data, setData, post, put, processing, errors } = useForm({
     name: location.name || "",
     type: location.type || "REG",
-    warehouse: (location.warehouse && location.warehouse.name) || "",
+    warehouse: location.warehouse || "",
     section: location.section || "FAST",
   });
+
+  const permission = usePermission(can, "Location");
+  const disabled = location.id ? !permission.update : !permission.create;
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -33,80 +37,88 @@ const LocationCreate = ({ location = {} }) => {
   return (
     <div className="px-4 py-6 bg-white rounded-lg">
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-col md:flex-row md:space-x-8">
-          <div className="w-full">
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-1/2">
-                <Label forInput="name" value="Name"></Label>
-                <InputError message={errors.name} />
+        <div className="grid grid-cols-2">
+          <div>
+            <div className="w-full">
+              <div className="flex justify-between items-start mb-3">
+                <div className="w-1/2">
+                  <Label forInput="name" value="Name"></Label>
+                  <InputError message={errors.name} />
+                </div>
+                <Input
+                  className="w-1/2"
+                  onChange={handleChange}
+                  value={data.name}
+                  type="text"
+                  name="name"
+                  id="name"
+                  required
+                  uppercase
+                  noSpace
+                  disabled={disabled}
+                />
               </div>
-              <Input
-                className="w-1/2"
-                onChange={handleChange}
-                value={data.name}
-                type="text"
-                name="name"
-                id="name"
-                required
-                uppercase
-                noSpace
-              />
-            </div>
 
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-1/2">
-                <Label forInput="type" value="Type"></Label>
-                <InputError message={errors.type} />
+              <div className="flex justify-between items-start mb-3">
+                <div className="w-1/2">
+                  <Label forInput="type" value="Type"></Label>
+                  <InputError message={errors.type} />
+                </div>
+                <Select
+                  className="w-1/2"
+                  onChange={handleChange}
+                  value={data.type}
+                  name="type"
+                  id="type"
+                  options={[
+                    { value: "BULK", label: "BULK" },
+                    {
+                      value: "PICK",
+                      label: "PICK",
+                    },
+                  ]}
+                  disabled={disabled}
+                ></Select>
               </div>
-              <Select
-                className="w-1/2"
-                onChange={handleChange}
-                value={data.type}
-                name="type"
-                id="type"
-                options={[
-                  { value: "BULK", label: "BULK" },
-                  {
-                    value: "PICK",
-                    label: "PICK",
-                  },
-                ]}
-              ></Select>
             </div>
-          </div>
-          <div className="w-full">
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-1/2">
-                <Label forInput="warehouse" value="Warehouse Name"></Label>
-                <InputError message={errors.warehouse} />
+            <div className="w-full">
+              <div className="flex items-start mb-3">
+                <div className="w-1/2">
+                  <Label forInput="warehouse" value="Warehouse Name"></Label>
+                  <InputError message={errors.warehouse} />
+                </div>
+                <div className="w-full">
+                  <InputLookup
+                    endpoint={route("api.master.warehouses.index")}
+                    name="warehouse"
+                    id="warehouse"
+                    resource="Warehouses"
+                    value={data.warehouse.name}
+                    onChange={handleChange}
+                    onFinish={(val) => setData("warehouse", val)}
+                    disabled={disabled}
+                  />
+                </div>
               </div>
-              <InputLookup
-                endpoint={route("api.master.warehouses.index")}
-                name="warehouse"
-                id="warehouse"
-                resource="Warehouses"
-                value={data.warehouse}
-                onChange={handleChange}
-                onFinish={(val) => setData("warehouse", val.name)}
-              />
-            </div>
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-1/2">
-                <Label forInput="section" value="Section" />
-                <InputError message={errors.section} />
+              <div className="flex items-start mb-3">
+                <div className="w-1/2">
+                  <Label forInput="section" value="Section" />
+                  <InputError message={errors.section} />
+                </div>
+                <Select
+                  className="w-1/2"
+                  onChange={handleChange}
+                  value={data.section}
+                  name="section"
+                  id="section"
+                  required
+                  options={[
+                    { value: "FAST", label: "FAST" },
+                    { value: "SLOW", label: "SLOW" },
+                  ]}
+                  disabled={disabled}
+                />
               </div>
-              <Select
-                className="w-1/2"
-                onChange={handleChange}
-                value={data.section}
-                name="section"
-                id="section"
-                required
-                options={[
-                  { value: "FAST", label: "FAST" },
-                  { value: "SLOW", label: "SLOW" },
-                ]}
-              />
             </div>
           </div>
         </div>
@@ -119,7 +131,7 @@ const LocationCreate = ({ location = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -134,7 +146,6 @@ LocationCreate.layout = (page) => (
     description={
       page.props.location ? "Location Details" : "Create new Location"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

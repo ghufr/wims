@@ -3,9 +3,9 @@ import Authenticated from "@/Layouts/Authenticated";
 
 import { Link } from "@inertiajs/inertia-react";
 import Button from "@/Components/Button";
-import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
+import useDelete from "@/Hooks/useDelete";
 
 const WarehouseIndex = ({ warehouses }) => {
   const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
@@ -45,14 +45,9 @@ const WarehouseIndex = ({ warehouses }) => {
     },
   ];
 
-  function handleDelete(id) {
-    Inertia.delete(route("master.warehouses.destroy", { id }));
-  }
-
-  function handleMassDelete(ids = []) {
-    if (ids.length === 0) return;
-    Inertia.delete(route("master.warehouses.destroy", { id: ids.join(",") }));
-  }
+  const { handleDelete, handleMassDelete } = useDelete(
+    "master.warehouses.destroy"
+  );
 
   return (
     <div>
@@ -84,9 +79,7 @@ const WarehouseIndex = ({ warehouses }) => {
 };
 
 WarehouseIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Warehouses">
-    {page}
-  </Authenticated>
+  <Authenticated title="Warehouses">{page}</Authenticated>
 );
 
 export default WarehouseIndex;

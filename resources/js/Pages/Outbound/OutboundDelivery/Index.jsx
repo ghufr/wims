@@ -92,9 +92,7 @@ const OutboundIndex = ({ outbounds = {} }) => {
 };
 
 OutboundIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Outbounds">
-    {page}
-  </Authenticated>
+  <Authenticated title="Outbounds">{page}</Authenticated>
 );
 
 export default OutboundIndex;

@@ -8,6 +8,7 @@ use App\Models\Vendor;
 use App\Services\ProductService;
 use App\Services\Utils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
@@ -34,11 +35,7 @@ class InboundDeliveryController extends Controller
   {
     $this->authorize('viewAll', InboundDelivery::class);
 
-    return Inertia::render('Inbound/InboundDelivery/Create', [
-      "can" => [
-        'edit_InboundDelivery' => true
-      ]
-    ]);
+    return Inertia::render('Inbound/InboundDelivery/Create');
   }
 
   /**
@@ -81,27 +78,24 @@ class InboundDeliveryController extends Controller
     return Redirect::route('inbound.delivery.index');
   }
 
-  public function show($id)
+  public function show(InboundDelivery $inbound)
   {
-    $this->authorize('view', InboundDelivery::class);
+    $this->authorize('view', $inbound);
 
-    $inbound = InboundDelivery::where("id", $id)->with(['client:id,name', 'supplier:id,name', 'products:id'])->firstOrFail();
+    $inbound = $inbound->with(['client:id,name', 'supplier:id,name', 'products:id'])->firstOrFail();
     $products = $inbound->products->map->pivot;
 
     $inbound = $inbound->toArray();
     $inbound['products'] = $products->toArray();
 
     return Inertia::render('Inbound/InboundDelivery/Create', [
-      "inbound" =>  $inbound,
-      "can" => [
-        'edit_InboundDelivery' => $inbound['status'] === 'OPEN'
-      ]
+      "inbound" =>  $inbound
     ]);
   }
 
-  public function update(Request $request, InboundDelivery $inboundDelivery)
+  public function update(Request $request, InboundDelivery $inbound)
   {
-    $this->authorize('update', InboundDelivery::class);
+    $this->authorize('update', $inbound);
 
     $validated = $request->validate([
       'client' => 'sometimes|exists:vendors,name',
@@ -113,11 +107,11 @@ class InboundDeliveryController extends Controller
     $supplier = Vendor::where('name', $validated['supplier'])->first();
 
     if ($client) {
-      $inboundDelivery->client()->associate($client);
+      $inbound->client()->associate($client);
     }
-    $inboundDelivery->supplier()->associate($supplier);
+    $inbound->supplier()->associate($supplier);
 
-    $inboundDelivery->update($validated);
+    $inbound->update($validated);
 
     return Redirect::route('inbound.delivery.index');
   }
@@ -130,7 +124,7 @@ class InboundDeliveryController extends Controller
    */
   public function destroy($id)
   {
-    $this->authorize('delete', InboundDelivery::class);
+    $this->authorize('update', $id);
 
     $ids = explode(',', $id);
     InboundDelivery::whereIn('id', $ids)->delete();

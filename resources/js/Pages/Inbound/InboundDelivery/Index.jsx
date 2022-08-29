@@ -82,9 +82,7 @@ const InboundIndex = ({ inbounds }) => {
 };
 
 InboundIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Inbound Deliveries">
-    {page}
-  </Authenticated>
+  <Authenticated title="Inbound Deliveries">{page}</Authenticated>
 );
 
 export default InboundIndex;

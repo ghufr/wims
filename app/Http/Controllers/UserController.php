@@ -17,14 +17,17 @@ class UserController extends Controller
 {
   public function index()
   {
+    $this->authorize('viewAll', User::class);
 
     return Inertia::render('Master/Users/Index', [
-      'users' => User::all()->makeHidden(['password'])
+      'users' => User::with('roles:id,name')->get()->makeHidden(['password'])
     ]);
   }
 
   public function create()
   {
+    $this->authorize('create', User::class);
+
     $permissions = Permission::all()->groupBy(function ($item, $key) {
       return explode('_', $item['name'])[1];
     });
@@ -38,6 +41,8 @@ class UserController extends Controller
 
   public function store(Request $request)
   {
+    $this->authorize('create', User::class);
+
     $request->validate([
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users',
@@ -57,8 +62,10 @@ class UserController extends Controller
     return Redirect::route('master.users.index');
   }
 
-  public function show($id)
+  public function show(User $user)
   {
+    $this->authorize('update', $user);
+
     $permissions = Permission::all()->groupBy(function ($item, $key) {
       return explode('_', $item['name'])[1];
     });
@@ -66,7 +73,7 @@ class UserController extends Controller
     $roles = Role::all();
 
     return Inertia::render('Master/Users/Create', [
-      "user" => User::where("id", $id)->first()->makeHidden(['password']),
+      "user" => $user->makeHidden(['password']),
       'permissions' => $permissions,
       'roles' => $roles,
     ]);
@@ -74,6 +81,7 @@ class UserController extends Controller
 
   public function update(Request $request, User $user)
   {
+    $this->authorize('update', $user);
 
     $request->validate([
       'name' => 'required|string|max:255',
@@ -96,6 +104,8 @@ class UserController extends Controller
 
   public function destroy($id)
   {
+    $this->authorize('delete', $id);
+
     $ids = explode(',', $id);
     User::whereIn('id', $ids)->delete();
     return Redirect::route('master.users.index');

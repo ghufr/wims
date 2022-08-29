@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Location;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
@@ -44,18 +45,18 @@ class LocationController extends Controller
     return Redirect::route('master.locations.index');
   }
 
-  public function show($id)
+  public function show(Location $location)
   {
-    $this->authorize('view', Location::class);
+    $this->authorize('view', $location);
 
     return Inertia::render('Master/Locations/Create', [
-      "location" => Location::with('warehouse:id,name')->where("id", $id)->first()
+      "location" => $location->with('warehouse:id,name')->first()
     ]);
   }
 
   public function update(Request $request, Location $location)
   {
-    $this->authorize('update', Location::class);
+    $this->authorize('update', $location);
 
     $validated = $request->validate([
       'name' => 'required|unique:locations,name,' . $location->id,
@@ -72,7 +73,7 @@ class LocationController extends Controller
 
   public function destroy($id)
   {
-    $this->authorize('delete', Location::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     Location::whereIn('id', $ids)->delete();

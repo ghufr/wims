@@ -59,7 +59,7 @@ class GoodsReceiptPolicy
    */
   public function update(User $user, GoodsReceipt $receipt)
   {
-    if ($user->can('edit_GoodsReceipt')) {
+    if ($user->can('update_GoodsReceipt')) {
       return true;
     }
   }

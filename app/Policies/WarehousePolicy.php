@@ -59,7 +59,7 @@ class WarehousePolicy
    */
   public function update(User $user, Warehouse $warehouse)
   {
-    if ($user->can('edit_Warehouse')) {
+    if ($user->can('update_Warehouse')) {
       return true;
     }
   }

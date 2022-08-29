@@ -15,9 +15,6 @@ class ProductController extends Controller
     $this->authorize('viewAll', Product::class);
 
     return Inertia::render('Master/Products/Index', [
-      'can' => [
-        'create' => Gate::allows('create', Product::class),
-      ],
       'products' => Product::all()
     ]);
   }
@@ -46,18 +43,18 @@ class ProductController extends Controller
     return Redirect::route('master.products.index');
   }
 
-  public function show($id)
+  public function show(Product $product)
   {
-    $this->authorize('view', Product::class);
+    $this->authorize('view', $product);
 
     return Inertia::render('Master/Products/Create', [
-      "product" => Product::where("id", $id)->first()
+      "product" => $product
     ]);
   }
 
   public function update(Request $request, Product $product)
   {
-    $this->authorize('update', Product::class);
+    $this->authorize('update', $product);
 
     $validated = $request->validate([
       'name' => 'required|unique:products,name,' . $product->id,
@@ -74,7 +71,7 @@ class ProductController extends Controller
 
   public function destroy($id)
   {
-    $this->authorize('delete', Product::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     Product::whereIn('id', $ids)->delete();

@@ -43,18 +43,18 @@ class CustomerController extends Controller
     return Redirect::route('master.customers.index');
   }
 
-  public function show($id)
+  public function show(Customer $customer)
   {
-    $this->authorize('view', Customer::class);
+    $this->authorize('view', $customer);
 
     return Inertia::render('Master/Customers/Create', [
-      "customer" => Customer::where("id", $id)->first()
+      "customer" => $customer
     ]);
   }
 
   public function update(Request $request, Customer $customer)
   {
-    $this->authorize('update', Customer::class);
+    $this->authorize('update', $customer);
 
     $validated = $request->validate([
       'name' => 'required|unique:customers,name,' . $customer->id,
@@ -73,7 +73,7 @@ class CustomerController extends Controller
 
   public function destroy($id)
   {
-    $this->authorize('delete', Customer::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     Customer::whereIn('id', $ids)->delete();

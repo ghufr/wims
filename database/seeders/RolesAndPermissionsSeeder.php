@@ -25,7 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
       'GoodsReceipt', 'DeliveryOrder',
       'Product', 'Location',
       'Warehouse', 'Vendor',
-      'Customer', 'User'
+      'Customer'
     ];
     $methods = ['viewAll', 'view', 'create', 'delete', 'update'];
 
@@ -39,15 +39,16 @@ class RolesAndPermissionsSeeder extends Seeder
       array_push($staffPermissions, ...['view_' . $model, 'viewAll_' . $model]);
     }
 
+    array_push($permissions, ...['viewAll_User', 'view_User', 'create_User', 'update_User', 'delete_User']);
+    array_push($permissions, ...['viewAll_Inventory', 'view_Inventory']);
+
     Permission::insertOrIgnore($permissions);
 
     $adminRole = Role::create(['name' => 'super-admin']);
     $adminRole->givePermissionTo(Permission::all());
 
     $staffRole = Role::create(['name' => 'staff']);
-    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', ...$staffPermissions]);
-
-
+    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', 'view_User', 'create_User', ...$staffPermissions]);
 
     $admin = User::factory()->create([
       'name' => 'Ghufron',

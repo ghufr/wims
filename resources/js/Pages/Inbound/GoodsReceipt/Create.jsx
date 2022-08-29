@@ -11,6 +11,7 @@ import InputError from "@/Components/InputError";
 import Checkbox from "@/Components/Checkbox";
 import useCsrf from "@/Hooks/useCsrf";
 import useItems from "@/Hooks/useItems";
+import usePermission from "@/Hooks/usePermission";
 
 const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
   useCsrf();
@@ -23,7 +24,8 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
     products: receipt.products || [{}],
   };
 
-  console.log(receipt);
+  const permission = usePermission(can, "GoodsReceipt");
+  const disabled = receipt.id ? !permission.update : !permission.create;
 
   const { data, setData, post, put, processing, errors } =
     useForm(defaultValues);
@@ -65,7 +67,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                   id="inboundNo"
                   value={data.inboundNo}
                   onChange={handleChange}
-                  disabled={receipt.id || !can.edit_GoodsReceipt}
+                  disabled={receipt.id || disabled}
                 />
               </div>
             </div>
@@ -98,7 +100,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                 value={data.client}
                 onChange={handleChange}
                 onFinish={(val) => setData("client", val.name)}
-                disabled={!can.edit_GoodsReceipt}
+                disabled={disabled}
               />
             </div>
             <div className="flex mb-4">
@@ -114,7 +116,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                 value={data.supplier}
                 onChange={handleChange}
                 onFinish={(val) => setData("supplier", val.name)}
-                disabled={!can.edit_GoodsReceipt}
+                disabled={disabled}
                 required
               />
             </div>
@@ -130,7 +132,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                   id="grDate"
                   onChange={handleChange}
                   value={data.grDate}
-                  disabled={!can.edit_GoodsReceipt}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -140,7 +142,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
         <hr className="mb-4" />
 
         <h4 className="font-medium text-lg mb-2">Product List</h4>
-        {can.edit_GoodsReceipt && (
+        {can.update_GoodsReceipt && (
           <div className="flex space-x-4 mb-4">
             <Button onClick={addItem}>Add</Button>
             {selectedCount > 0 && (
@@ -168,7 +170,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                     <label htmlFor={`no-${i}`} className="mr-1">
                       {i + 1}
                     </label>
-                    {can.edit_GoodsReceipt && (
+                    {can.update_GoodsReceipt && (
                       <Checkbox
                         id={`no-${i}`}
                         checked={item.selected}
@@ -188,7 +190,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                     id={`products[${i}]`}
                     resource="Product"
                     value={item.name}
-                    disabled={!can.edit_GoodsReceipt}
+                    disabled={disabled}
                     onChange={(e) =>
                       updateItem(i, { ...item, name: e.target.value })
                     }
@@ -210,7 +212,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
                     type="number"
                     min={1}
                     value={item.quantity || 1}
-                    disabled={!item.description || !can.edit_GoodsReceipt}
+                    disabled={!item.description || disabled}
                     onChange={(e) => {
                       updateItem(i, { ...item, quantity: e.target.value });
                     }}
@@ -229,7 +231,7 @@ const GoodsReceiptCreate = ({ receipt = {}, can = {} }) => {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={processing || !can.edit_GoodsReceipt}>
+          <Button type="submit" disabled={processing || disabled}>
             Save
           </Button>
         </div>
@@ -244,7 +246,6 @@ GoodsReceiptCreate.layout = (page) => (
     description={
       page.props.receipt ? "Goods Receipt Details" : "Create new Goods Receipt"
     }
-    user={page.props.auth.user}
   >
     {page}
   </Authenticated>

@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
     $user = null;
     $can = [];
     if ($request->user() !== null) {
-      $can = $request->user()->getAllPermissions()->pluck('name')->flip();
+      $can = $request->user()->getPermissionsViaRoles()->pluck('name')->flip()->toArray();
       $user = $request->user()->only(['email', 'id', 'name']);
     }
 

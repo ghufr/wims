@@ -91,9 +91,7 @@ const GoodsReceiptIndex = ({ receipts }) => {
 };
 
 GoodsReceiptIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Goods Receipts">
-    {page}
-  </Authenticated>
+  <Authenticated title="Goods Receipts">{page}</Authenticated>
 );
 
 export default GoodsReceiptIndex;

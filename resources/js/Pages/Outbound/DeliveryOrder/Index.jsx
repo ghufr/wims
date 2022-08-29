@@ -101,9 +101,7 @@ const DeliveryOrderIndex = ({ orders = {} }) => {
 };
 
 DeliveryOrderIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Delivery Order">
-    {page}
-  </Authenticated>
+  <Authenticated title="Delivery Order">{page}</Authenticated>
 );
 
 export default DeliveryOrderIndex;

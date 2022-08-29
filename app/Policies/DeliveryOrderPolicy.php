@@ -59,7 +59,7 @@ class DeliveryOrderPolicy
    */
   public function update(User $user, DeliveryOrder $order)
   {
-    if ($user->can('edit_DeliveryOrder')) {
+    if ($user->can('update_DeliveryOrder')) {
       return true;
     }
   }

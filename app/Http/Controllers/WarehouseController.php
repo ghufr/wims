@@ -43,18 +43,18 @@ class WarehouseController extends Controller
     return Redirect::route('master.warehouses.index');
   }
 
-  public function show($id)
+  public function show(Warehouse $warehouse)
   {
-    $this->authorize('view', Warehouse::class);
+    $this->authorize('view', $warehouse);
 
     return Inertia::render('Master/Warehouses/Create', [
-      "warehouse" => Warehouse::where("id", $id)->first()
+      "warehouse" => $warehouse
     ]);
   }
 
   public function update(Request $request, Warehouse $warehouse)
   {
-    $this->authorize('update', Warehouse::class);
+    $this->authorize('update', $warehouse);
 
     $validated = $request->validate([
       'name' => 'required|unique:warehouses,name,' . $warehouse->id,
@@ -72,7 +72,7 @@ class WarehouseController extends Controller
 
   public function destroy($id)
   {
-    $this->authorize('delete', Warehouse::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     Warehouse::whereIn('id', $ids)->delete();

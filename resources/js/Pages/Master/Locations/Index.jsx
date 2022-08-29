@@ -3,9 +3,9 @@ import Authenticated from "@/Layouts/Authenticated";
 
 import { Link } from "@inertiajs/inertia-react";
 import Button from "@/Components/Button";
-import { Inertia } from "@inertiajs/inertia";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
+import useDelete from "@/Hooks/useDelete";
 
 const LocationIndex = ({ locations }) => {
   const { select, setSelect, isSelected, onSelectChange } = useSelect([]);
@@ -39,14 +39,9 @@ const LocationIndex = ({ locations }) => {
     },
   ];
 
-  function handleDelete(id) {
-    Inertia.delete(route("master.locations.destroy", { id }));
-  }
-
-  function handleMassDelete(ids = []) {
-    if (ids.length === 0) return;
-    Inertia.delete(route("master.locations.destroy", { id: ids.join(",") }));
-  }
+  const { handleDelete, handleMassDelete } = useDelete(
+    "master.locations.destroy"
+  );
 
   return (
     <div>
@@ -78,9 +73,7 @@ const LocationIndex = ({ locations }) => {
 };
 
 LocationIndex.layout = (page) => (
-  <Authenticated user={page.props.auth.user} title="Locations">
-    {page}
-  </Authenticated>
+  <Authenticated title="Locations">{page}</Authenticated>
 );
 
 export default LocationIndex;

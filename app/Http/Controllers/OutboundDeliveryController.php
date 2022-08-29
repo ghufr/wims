@@ -22,11 +22,7 @@ class OutboundDeliveryController extends Controller
     $this->authorize('viewAll', OutboundDelivery::class);
 
     return Inertia::render('Outbound/OutboundDelivery/Index', [
-      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
-      'can' => [
-        'edit_OutboundDelivery' => true,
-        'create_OutboundDelivery' => true
-      ]
+      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get()
     ]);
   }
 
@@ -39,11 +35,7 @@ class OutboundDeliveryController extends Controller
   {
     $this->authorize('create', OutboundDelivery::class);
 
-    return Inertia::render('Outbound/OutboundDelivery/Create', [
-      'can' => [
-        'edit_OutboundDelivery' => true,
-      ]
-    ]);
+    return Inertia::render('Outbound/OutboundDelivery/Create');
   }
 
   /**
@@ -85,39 +77,25 @@ class OutboundDeliveryController extends Controller
     return Redirect::route('outbound.delivery.index');
   }
 
-  /**
-   * Display the specified resource.
-   *
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function show($id)
+  public function show(OutboundDelivery $outbound)
   {
-    $this->authorize('view', OutboundDelivery::class);
+    $this->authorize('view', $outbound);
 
-    $outbound = OutboundDelivery::where('id', $id)->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
+    $outbound = $outbound->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
     $products = $outbound->products->map->pivot;
 
     $outbound = $outbound->toArray();
     $outbound['products'] = $products->toArray();
     return Inertia::render('Outbound/OutboundDelivery/Create', [
       "outbound" => $outbound,
-      "can" => [
-        'edit_OutboundDelivery' => $outbound['status'] === 'OPEN'
-      ]
+
     ]);
   }
 
-  /**
-   * Update the specified resource in storage.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   * @param  int  $id
-   * @return \Illuminate\Http\Response
-   */
-  public function update(Request $request, $id)
+
+  public function update(Request $request, OutboundDelivery $outbound)
   {
-    $this->authorize('update', OutboundDelivery::class);
+    $this->authorize('update', $outbound);
 
     //
   }
@@ -130,7 +108,7 @@ class OutboundDeliveryController extends Controller
    */
   public function destroy($id)
   {
-    $this->authorize('delete', OutboundDelivery::class);
+    $this->authorize('delete', $id);
 
     $ids = explode(',', $id);
     OutboundDelivery::whereIn('id', $ids)->delete();
