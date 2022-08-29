@@ -50,7 +50,7 @@ class LocationController extends Controller
     $this->authorize('view', $location);
 
     return Inertia::render('Master/Locations/Create', [
-      "location" => $location->with('warehouse:id,name')->first()
+      "location" => $location->load('warehouse:id,name')
     ]);
   }
 

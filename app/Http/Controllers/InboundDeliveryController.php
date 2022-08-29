@@ -82,7 +82,7 @@ class InboundDeliveryController extends Controller
   {
     $this->authorize('view', $inbound);
 
-    $inbound = $inbound->with(['client:id,name', 'supplier:id,name', 'products:id'])->firstOrFail();
+    $inbound = $inbound->load(['client:id,name', 'supplier:id,name', 'products:id']);
     $products = $inbound->products->map->pivot;
 
     $inbound = $inbound->toArray();

@@ -81,7 +81,7 @@ class GoodsReceiptController extends Controller
   {
     $this->authorize('view', $receipt);
 
-    $receipt = $receipt->with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->firstOrFail();
+    $receipt = $receipt->load(['client:id,name', 'supplier:id,name', 'warehouse:id,name']);
     $products = $receipt->products->map->pivot;
 
     $receipt = $receipt->toArray();

@@ -81,7 +81,7 @@ class OutboundDeliveryController extends Controller
   {
     $this->authorize('view', $outbound);
 
-    $outbound = $outbound->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
+    $outbound = $outbound->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description']);
     $products = $outbound->products->map->pivot;
 
     $outbound = $outbound->toArray();

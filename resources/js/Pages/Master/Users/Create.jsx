@@ -11,18 +11,18 @@ import Select from "@/Components/Select";
 import useSelect from "@/Hooks/useSelect";
 import usePermission from "@/Hooks/usePermission";
 
-const methods = ["View", "ViewAll", "Create", "Delete", "Update"];
+const methods = ["ViewAll", "View", "Create", "Delete", "Update"];
 
-const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
+const UserCreate = ({ userData = {}, permissions = [], roles = [], can }) => {
   const { data, setData, post, put, processing, errors } = useForm({
-    name: user.name || "",
-    email: user.email || "",
-    password: user.password || "",
-    role: "",
+    name: userData.name || "",
+    email: userData.email || "",
+    password: userData.password || "",
+    role: (userData.roles && userData.roles[0].name) || "",
   });
 
   const permission = usePermission(can, "User");
-  const disabled = user.id ? !permission.update : !permission.create;
+  const disabled = userData.id ? !permission.update : !permission.create;
 
   const { select, onSelectChange } = useSelect([]);
 
@@ -31,10 +31,12 @@ const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
     setData(name, value);
   }
 
+  console.log(userData.roles);
+
   function handleSubmit(e) {
     e.preventDefault();
-    if (user.id) {
-      put(route("master.users.update", { id: user.id }));
+    if (userData.id) {
+      put(route("master.users.update", { id: userData.id }));
     } else {
       post(route("master.users.store"));
     }
@@ -57,7 +59,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
                 value={data.email}
                 name="email"
                 id="email"
-                disabled={user.id || disabled}
+                disabled={userData.id || disabled}
               ></Input>
             </div>
             <div className="flex justify-between items-start mb-3">
@@ -89,7 +91,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
                 value={data.password}
                 name="password"
                 id="password"
-                placeholder={user.id ? "(Unchanged)" : ""}
+                placeholder={userData.id ? "(Unchanged)" : ""}
                 disabled={disabled}
               />
             </div>
@@ -178,7 +180,7 @@ const UserCreate = ({ user = {}, permissions = [], roles = [], can }) => {
 UserCreate.layout = (page) => (
   <Authenticated
     title="Users"
-    description={page.props.user ? "User Details" : "Create new User"}
+    description={page.props.userData ? "User Details" : "Create new User"}
   >
     {page}
   </Authenticated>

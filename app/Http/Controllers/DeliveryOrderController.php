@@ -80,7 +80,7 @@ class DeliveryOrderController extends Controller
   {
     $this->authorize('view', $order);
 
-    $order = $order->with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description'])->firstOrFail();
+    $order = $order->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description']);
     $products = $order->products->map->pivot;
 
     $order = $order->toArray();

@@ -26,10 +26,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'web'])->name('dashboard');
 
 
-Route::prefix('inbound')->name('inbound.')->middleware(['auth'])->group(function () {
+Route::prefix('inbound')->name('inbound.')->middleware(['auth', 'web'])->group(function () {
   Route::resources(
     [
       'delivery' => InboundDeliveryController::class,
@@ -39,7 +39,7 @@ Route::prefix('inbound')->name('inbound.')->middleware(['auth'])->group(function
   );
 });
 
-Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(function () {
+Route::prefix('outbound')->name('outbound.')->middleware(['auth', 'web'])->group(function () {
   Route::resources(
     [
       'delivery' => OutboundDeliveryController::class,
@@ -49,11 +49,11 @@ Route::prefix('outbound')->name('outbound.')->middleware(['auth'])->group(functi
   );
 });
 
-Route::prefix('inventory')->name('inventory.')->middleware(['auth'])->group(function () {
+Route::prefix('inventory')->name('inventory.')->middleware(['auth', 'web'])->group(function () {
   Route::get('list', [InventoryController::class, 'index'])->name('list.index');
 });
 
-Route::prefix('master')->name('master.')->middleware(['auth'])->group(function () {
+Route::prefix('master')->name('master.')->middleware(['auth', 'web'])->group(function () {
   Route::resources(
     [
       'products' => ProductController::class,

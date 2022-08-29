@@ -73,7 +73,7 @@ class UserController extends Controller
     $roles = Role::all();
 
     return Inertia::render('Master/Users/Create', [
-      "user" => $user->makeHidden(['password']),
+      "userData" => $user->load('roles:id,name')->firstOrFail()->makeHidden(['password']),
       'permissions' => $permissions,
       'roles' => $roles,
     ]);
@@ -88,8 +88,6 @@ class UserController extends Controller
       'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
       // 'permissions'
     ]);
-
-    // 'edit article, create user, edit user'
 
     // $user->givePermissionTo('');
 
