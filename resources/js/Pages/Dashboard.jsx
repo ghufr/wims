@@ -3,7 +3,7 @@ import Authenticated from "@/Layouts/Authenticated";
 import { Head } from "@inertiajs/inertia-react";
 // import Table from "@/Components/Table";
 
-const Dashboard = () => {
+const Dashboard = (props) => {
   // const columns = [
   //   {
   //     name: "Warehouse",
@@ -20,6 +20,7 @@ const Dashboard = () => {
   // ];
   return (
     <div>
+      {console.log(props)}
       <Head title="Dashboard" />
       <div>
         <div className="mb-4">

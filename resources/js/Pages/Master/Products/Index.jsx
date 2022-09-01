@@ -49,7 +49,7 @@ const ProductIndex = ({ products, can = {} }) => {
     <div>
       <div className="mb-4">
         <div className="flex space-x-3 items-center text-gray-500">
-          {can.create && (
+          {can.create_Product && (
             <Link href={route("master.products.create")}>
               <Button>Create Product</Button>
             </Link>

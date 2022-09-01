@@ -6,6 +6,7 @@ import Button from "@/Components/Button";
 import Table from "@/Components/Table";
 import useSelect from "@/Hooks/useSelect";
 import useDelete from "@/Hooks/useDelete";
+// import DataGrid from "@/Components/DataGrid";
 
 const InboundIndex = ({ inbounds }) => {
   const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
@@ -66,6 +67,8 @@ const InboundIndex = ({ inbounds }) => {
           )}
         </div>
       </div>
+
+      {/* <DataGrid rows={inbounds} columns={columns} /> */}
 
       <Table
         columns={columns}

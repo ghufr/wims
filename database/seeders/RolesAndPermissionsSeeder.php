@@ -11,6 +11,13 @@ use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+
+  protected function crud($entity, $methods)
+  {
+    return collect($methods)->map(function ($item) use ($entity) {
+      return ['name' => $item . '_' . $entity, 'guard_name' => 'web'];
+    })->toArray();
+  }
   /**
    * Run the database seeds.
    *
@@ -29,18 +36,15 @@ class RolesAndPermissionsSeeder extends Seeder
     ];
     $methods = ['viewAll', 'view', 'create', 'delete', 'update'];
 
-    $permissions = [];
+    $permissions = ['viewAll_Dashboard'];
     $staffPermissions = [];
 
     foreach ($models as $model) {
-      foreach ($methods as $method) {
-        array_push($permissions, ['name' => $method . '_' . $model, 'guard_name' => 'web']);
-      }
-      array_push($staffPermissions, ...['view_' . $model, 'viewAll_' . $model]);
+      $permissions = [...$permissions, ...$this->crud($model, $methods)];
+      $staffPermissions =  [...$staffPermissions, ...['view_' . $model, 'viewAll_' . $model]];
     }
 
-    array_push($permissions, ...['viewAll_User', 'view_User', 'create_User', 'update_User', 'delete_User']);
-    array_push($permissions, ...['viewAll_Inventory', 'view_Inventory']);
+    $permissions = [...$permissions, ...$this->crud('User', $methods), ...$this->crud('Inventory', ['view', 'viewAll'])];
 
     Permission::insertOrIgnore($permissions);
 
@@ -48,7 +52,7 @@ class RolesAndPermissionsSeeder extends Seeder
     $adminRole->givePermissionTo(Permission::all());
 
     $staffRole = Role::create(['name' => 'staff']);
-    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', 'view_User', 'create_User', ...$staffPermissions]);
+    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', ...$staffPermissions]);
 
     $admin = User::factory()->create([
       'name' => 'Ghufron',

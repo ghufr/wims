@@ -25,11 +25,7 @@ const Table = ({
               <th className="p-1 text-center">
                 <Checkbox
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      onSelectAll(data.map((item) => item.id));
-                    } else {
-                      onSelectAll([]);
-                    }
+                    onSelectAll(e.target.checked);
                   }}
                 />
               </th>

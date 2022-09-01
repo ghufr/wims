@@ -1,7 +1,6 @@
 import React from "react";
 
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { HiOutlineSearch } from "react-icons/hi";
 import Button from "./Button";
 import Input from "./Input";
@@ -9,20 +8,8 @@ import ButtonIcon from "./ButtonIcon";
 import axios from "axios";
 import Checkbox from "./Checkbox";
 import { useQuery } from "@tanstack/react-query";
-
-const makeRequest = async (request) => {
-  const token = window.localStorage.getItem("uhuyy");
-  if (!token) return [];
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-  return request({ headers, withCredentials: true })
-    .then((res) => res.data)
-    .catch(() => {
-      // window.history.replace("/login");
-    });
-};
+import Modal from "./Modal";
+import { makeRequest } from "@/Utils/request";
 
 export default function InputLookup({
   resource,
@@ -82,88 +69,49 @@ export default function InputLookup({
           </ButtonIcon>
         )}
       </div>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-10"
-          onClose={() => setIsOpen(false)}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-100"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
-          </Transition.Child>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={`Select ${resource}`}
+      >
+        <div className="mt-2">
+          <table className="table-auto w-full mb-4">
+            <thead className="bg-gray-200">
+              <tr>
+                <th></th>
+                <th className="p-2">Name</th>
+                <th className="p-2">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {error && <p>{error.message}</p>}
 
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-150"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-100"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
-                  >
-                    Select {resource}
-                  </Dialog.Title>
-                  <div className="mt-2">
-                    <table className="table-auto w-full mb-4">
-                      <thead className="bg-gray-200">
-                        <tr>
-                          <th></th>
-                          <th className="p-2">Name</th>
-                          <th className="p-2">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {error && <p>{error.message}</p>}
+              {data.map((item, i) => (
+                <tr
+                  key={i}
+                  className="hover:bg-gray-100 cursor-pointer"
+                  onClick={() => setValue({ ...item, index: i })}
+                >
+                  <td className="text-center">
+                    <Checkbox checked={_value && _value.index === i} />
+                  </td>
+                  <td className="p-2">{item.name}</td>
+                  <td className="p-2">{item.description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-                        {data.map((item, i) => (
-                          <tr
-                            key={i}
-                            className="hover:bg-gray-100 cursor-pointer"
-                            onClick={() => setValue({ ...item, index: i })}
-                          >
-                            <td className="text-center">
-                              <Checkbox
-                                checked={_value && _value.index === i}
-                                // onChange={() => setValue({ ...item, index: i })}
-                              />
-                            </td>
-                            <td className="p-2">{item.name}</td>
-                            <td className="p-2">{item.description}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="flex justify-end space-x-4">
-                    <Button outline onClick={() => setIsOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="button" onClick={handleSubmit}>
-                      Apply
-                    </Button>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition>
+        <div className="flex justify-end space-x-4">
+          <Button outline onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleSubmit}>
+            Apply
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
