@@ -1,73 +1,120 @@
-import React from "react";
+import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 
-import { Link } from "@inertiajs/inertia-react";
-import Button from "@/Components/Button";
-import Table from "@/Components/Table";
-import useSelect from "@/Hooks/useSelect";
-import useDelete from "@/Hooks/useDelete";
+import { ButtonGroup, Button, Modal, Box, Typography } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import LocationForm from "@/Components/Forms/LocationForm";
+import useResource from "@/Hooks/useResource";
 
-const LocationIndex = ({ locations }) => {
-  const { select, setSelect, isSelected, onSelectChange } = useSelect([]);
-  // console.log(locations);
+const LocationIndex = ({ locations, warehouses, can = {} }) => {
+  const [select, setSelect] = useState();
+  const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
-      name: "Name",
-      selector: "name",
+      headerName: "Name",
+      field: "name",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 150,
+      renderCell: (params) => (
+        <Button
+          sx={{ justifyContent: "flex-start", padding: 0 }}
+          fullWidth
+          onClick={() => setSelect(params.row.id)}
+        >
+          {params.row.name}
+        </Button>
+      ),
     },
     {
-      name: "Type",
-      selector: "type",
+      headerName: "Warehouse",
+      field: "warehouse",
+      flex: 1,
+      minWidth: 80,
+      valueGetter: (params) => params.row.warehouse.name,
     },
     {
-      name: "Warehouse",
-      selector: "warehouse",
-      format: (warehouse) => warehouse.name,
+      headerName: "Section",
+      field: "section",
+      flex: 1,
+      minWidth: 80,
     },
     {
-      name: "Section",
-      selector: "section",
+      headerName: "Type",
+      field: "type",
+      flex: 1,
+      minWidth: 80,
     },
     {
-      name: "Updated At",
-      selector: "updated_at",
-      format: (column) =>
-        new Date(column).toLocaleDateString("id-ID", {
+      headerName: "Updated At",
+      field: "updated_at",
+      valueGetter: (params) =>
+        new Date(params.row.updated_at).toLocaleDateString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
         }),
+      flex: 1,
+      minWidth: 100,
     },
   ];
 
-  const { handleDelete, handleMassDelete } = useDelete(
-    "master.locations.destroy"
-  );
+  const { destroyMany } = useResource("master.users");
 
   return (
     <div>
-      <div className="mb-4">
-        <div className="flex space-x-3 items-center text-gray-500">
-          <Link href={route("master.locations.create")}>
-            <Button>Create Location</Button>
-          </Link>
-          {isSelected && (
-            <Button outline onClick={() => handleMassDelete(select)}>
-              Delete Selected ({select.length})
-            </Button>
-          )}
-        </div>
+      <Modal
+        open={select > -1}
+        onClose={() => setSelect(-1)}
+        aria-labelledby="modal-title"
+      >
+        <Box sx={{ maxWidth: 500 }} className="modal-bg">
+          <Typography id="modal-title" variant="h6" component="h2">
+            {select ? "Edit" : "Create"} Location
+          </Typography>
+          <Box>
+            <LocationForm
+              id={select}
+              onFinish={() => setSelect(-1)}
+              onCancel={() => setSelect(-1)}
+              data={{ warehouses }}
+            />
+          </Box>
+        </Box>
+      </Modal>
+      <ButtonGroup
+        variant="text"
+        aria-label="outlined primary button group"
+        sx={{ marginBottom: 2 }}
+      >
+        {can.create_Location && (
+          <Button variant="contained" size="small" onClick={() => setSelect(0)}>
+            Create
+          </Button>
+        )}
+        {can.delete_Location && selectedRows.length > 0 && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => destroyMany(selectedRows)}
+          >
+            Delete ({selectedRows.length})
+          </Button>
+        )}
+      </ButtonGroup>
+      <div style={{ height: 400, width: "100%" }}>
+        <DataGrid
+          rows={locations}
+          columns={columns}
+          rowsPerPageOptions={[25, 50, 100]}
+          onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          selectionModel={selectedRows}
+          checkboxSelection
+          density="compact"
+          autoHeight
+          disableSelectionOnClick
+          onRowDoubleClick={(params) => setSelect(params.row.id)}
+        />
       </div>
-
-      <Table
-        columns={columns}
-        data={locations}
-        selectableRows
-        onSelectedRowsChange={(item) => onSelectChange(item.id)}
-        onSelectAll={setSelect}
-        selectedRows={select}
-        rowEdit={(row) => route("master.locations.show", { id: row.id })}
-        rowDelete={(row) => handleDelete(row.id)}
-      />
     </div>
   );
 };

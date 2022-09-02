@@ -1,15 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+html,
+body {
+  margin: 0;
+}
 
-@layer base {
-  html {
-    font-family: "Poppins", sans-serif;
-  }
-  select {
-    appearance: none;
-  }
-  textarea {
-    resize: none;
-  }
+.modal-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  background-color: #fff;
+  border: 2px solid #000;
+  border-radius: 12px;
+  /* box-shadow: 24px; */
+  padding: 1em;
 }

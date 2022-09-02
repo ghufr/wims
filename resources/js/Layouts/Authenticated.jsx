@@ -1,6 +1,4 @@
-import { Disclosure } from "@headlessui/react";
 import React from "react";
-import Button from "@/Components/Button";
 
 import {
   HiOutlineHome,
@@ -9,62 +7,79 @@ import {
   HiOutlineCog,
   HiOutlineArrowSmLeft,
   HiOutlineArchive,
+  HiChevronUp,
 } from "react-icons/hi";
 import { Head, Link, usePage } from "@inertiajs/inertia-react";
-import NavLink from "@/Components/NavLink";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  AppBar,
+  Box,
+  Collapse,
+  CssBaseline,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const renderMenu = (menu) => {
+const renderMenu = (menu, padding = 4) => {
   if (menu.children) {
+    const [open, setOpen] = useState(false);
     if (menu.children.filter((sub) => sub.show) < 1) return;
     return (
-      <Disclosure key={menu.name} as={"li"} defaultOpen={false}>
-        <Disclosure.Button
-          className="w-full flex justify-between items-center py-2 px-2  font-medium text-gray-500 rounded-lg hover:bg-gray-100 hover:text-gray-700 transition-all"
-          aria-controls="dropdown-example"
-          data-collapse-toggle="dropdown-example"
-        >
-          <menu.icon size={24} className="mr-3 hidden md:block" />
-          <span className="flex-1 text-left whitespace-nowrap">
-            {menu.name}
-          </span>
-          <span className="text-right">
-            <HiChevronDown />
-          </span>
-        </Disclosure.Button>
-
-        <Disclosure.Panel
-          as="ul"
-          className="py-2 absolute bg-white md:relative rounded space-y-1 ml-3"
-        >
-          {menu.children.map((menu) => renderMenu(menu))}
-        </Disclosure.Panel>
-      </Disclosure>
+      <>
+        <ListItem disablePadding key={menu.name + 1}>
+          <ListItemButton onClick={() => setOpen(!open)} dense>
+            {/* <ListItemIcon> */}
+            <menu.icon size={22} style={{ marginRight: 8 }} />
+            {/* </ListItemIcon> */}
+            <ListItemText primary={menu.name} />
+            {open ? <HiChevronUp /> : <HiChevronDown />}
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={open} timeout="auto" unmountOnExit key={menu.name + 2}>
+          <List component="div" disablePadding>
+            {menu.children.map((menu) => renderMenu(menu, 4))}
+          </List>
+        </Collapse>
+      </>
     );
   }
 
   if (!menu.show) return null;
 
   return (
-    <li key={menu.name}>
-      <NavLink
+    <ListItem key={menu.name} disablePadding>
+      <ListItemButton
         href={menu.href && route(menu.href)}
-        active={menu.href && route().current(menu.href)}
+        component={Link}
+        dense
+        sx={{ pl: padding || 2 }}
+        selected={menu.href && route().current(menu.href)}
       >
-        {menu.icon && <menu.icon className="mr-3 hidden md:block" size={24} />}
-        <span>{menu.name}</span>
-      </NavLink>
-    </li>
+        {menu.icon && (
+          // <ListItemIcon>
+          <menu.icon size={22} style={{ marginRight: 8 }} />
+          // </ListItemIcon>
+        )}
+
+        <ListItemText primary={menu.name} />
+      </ListItemButton>
+    </ListItem>
   );
 };
 
 export default function Authenticated({ title = "", description, children }) {
   const { props } = usePage();
 
-  const user = props.auth.user;
+  // const user = props.auth.user;
 
   function can(permission) {
     return props.can[permission] != null;
@@ -158,46 +173,64 @@ export default function Authenticated({ title = "", description, children }) {
     },
   ];
 
+  const drawerWidth = 240;
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-full min-h-screen flex-row bg-gray-100">
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar variant="dense">
+          <Typography variant="h6" noWrap component="div">
+            {title}
+          </Typography>
+          <p>{description || " "}</p>
+        </Toolbar>
+      </AppBar>
+      <CssBaseline />
+      <Box sx={{ display: "flex" }}>
         <Head>
           <title>{title}</title>
         </Head>
-        <aside
-          className="hidden md:block md:max-w-xs w-full min-h-screen"
-          aria-label="Sidebar"
+        <Box
+          component="nav"
+          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+          aria-label="mailbox folders"
         >
-          <div className="h-full bg-white border-r border-gray-200">
-            <div className="relative flex flex-col h-full justify-between">
-              <div className="h-full max-h-screen min-h-screen pb-16 overflow-y-auto py-4 px-4">
-                <nav>
-                  <ul className="space-y-1">{menus.map(renderMenu)}</ul>
-                </nav>
-              </div>
-              <div className="absolute bottom-0 w-full flex justify-between items-center bg-gray-50 p-4">
-                <p className="font-medium text-sm">{user.name}</p>
-                <Link href={route("logout")} method="post" as="div">
-                  <Button outline>Logout</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </aside>
+          <Drawer
+            variant="permanent"
+            component="nav"
+            sx={{
+              display: { xs: "none", sm: "block" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: drawerWidth,
+              },
+            }}
+            anchor="left"
+          >
+            <Toolbar variant="dense"></Toolbar>
 
-        <main className="w-full">
-          <nav className="md:hidden bg-gray-200 py-2">
-            <ul className="flex space-x-4">{menus.map(renderMenu)}</ul>
-          </nav>
-          <div className="p-2 md:p-6">
-            <div className="mb-4">
-              <h1 className="text-xl font-bold">{title}</h1>
-              <p className="text-gray-500 font-medium">{description || " "}</p>
-            </div>
-            <div>{children}</div>
-          </div>
-        </main>
-      </div>
+            <List>{menus.map(renderMenu)}</List>
+          </Drawer>
+        </Box>
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+          }}
+        >
+          <Toolbar variant="dense" />
+          {children}
+        </Box>
+      </Box>
     </QueryClientProvider>
   );
 }

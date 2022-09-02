@@ -36,7 +36,7 @@ class RolesAndPermissionsSeeder extends Seeder
     ];
     $methods = ['viewAll', 'view', 'create', 'delete', 'update'];
 
-    $permissions = ['viewAll_Dashboard'];
+    $permissions = [];
     $staffPermissions = [];
 
     foreach ($models as $model) {
