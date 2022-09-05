@@ -47,8 +47,8 @@ class WarehouseController extends Controller
   {
     $this->authorize('view', $warehouse);
 
-    return Inertia::render('Master/Warehouses/Create', [
-      "warehouse" => $warehouse
+    return response()->json([
+      'warehouse' => $warehouse
     ]);
   }
 

@@ -1,11 +1,16 @@
 import React, { Fragment } from "react";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { Box } from "@mui/material";
 
-const Modal = ({ isOpen, onClose, title, desc, children }) => {
+const Modal = ({ open, onClose, children }) => {
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={onClose}>
+    <Transition appear show={open} as={Fragment}>
+      <Dialog
+        as="div"
+        style={{ position: "relative", zIndex: 100000 }}
+        onClose={onClose}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-100"
@@ -15,11 +20,25 @@ const Modal = ({ isOpen, onClose, title, desc, children }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "black",
+              opacity: "25%",
+            }}
+          />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <Box sx={{ position: "fixed", overflowY: "auto", inset: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              minHeight: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-150"
@@ -29,21 +48,10 @@ const Modal = ({ isOpen, onClose, title, desc, children }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4"
-                >
-                  {title}
-                </Dialog.Title>
-
-                {desc && <Dialog.Description>{desc}</Dialog.Description>}
-
-                {children}
-              </Dialog.Panel>
+              <Dialog.Panel>{children}</Dialog.Panel>
             </Transition.Child>
-          </div>
-        </div>
+          </Box>
+        </Box>
       </Dialog>
     </Transition>
   );

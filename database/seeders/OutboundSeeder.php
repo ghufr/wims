@@ -17,8 +17,8 @@ class OutboundSeeder extends Seeder
    */
   public function run()
   {
-    $outbounds = OutboundDelivery::factory(5)->create();
-    $deliveries = DeliveryOrder::factory(5)->create();
+    $outbounds = OutboundDelivery::factory(10)->create();
+    $deliveries = DeliveryOrder::factory(10)->create();
 
 
     foreach ($outbounds as $key => $outbound) {
@@ -26,7 +26,10 @@ class OutboundSeeder extends Seeder
       $delivery = $deliveries->get($key);
 
       foreach ($products as $product) {
-        $nProduct = ['quantity' => rand(10, 100), ...$product->only(['name', 'description', 'baseUom'])];
+        $quantity = rand(100, 1000);
+        $price = rand(21000, 75000);
+        $amount = $price * $quantity;
+        $nProduct = ['price' => $price, 'quantity' => $quantity, 'amount' => $amount, ...$product->only(['name', 'description', 'baseUom'])];
 
         $delivery->products()->attach($product->id, $nProduct);
         $outbound->products()->attach($product->id, $nProduct);

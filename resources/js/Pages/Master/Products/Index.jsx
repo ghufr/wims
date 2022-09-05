@@ -1,77 +1,126 @@
-import React from "react";
+import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
+import Modal from "@/Components/Modal";
 
-import { Link } from "@inertiajs/inertia-react";
-import Button from "@/Components/Button";
-import Table from "@/Components/Table";
-import useSelect from "@/Hooks/useSelect";
-import useDelete from "@/Hooks/useDelete";
+import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import ProductForm from "@/Components/Forms/ProductForm";
+import useResource from "@/Hooks/useResource";
 
 const ProductIndex = ({ products, can = {} }) => {
-  const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
+  const [select, setSelect] = useState(-1);
+  const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
-      name: "Name",
-      selector: "name",
+      headerName: "Name",
+      field: "name",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 150,
+      renderCell: (params) => (
+        <Button
+          sx={{ justifyContent: "flex-start", padding: 0 }}
+          fullWidth
+          onClick={() => setSelect(params.row.id)}
+        >
+          {params.row.name}
+        </Button>
+      ),
     },
     {
-      name: "Description",
-      selector: "description",
+      headerName: "Description",
+      field: "description",
+      minWidth: 100,
     },
     {
-      name: "Base EAN",
-      selector: "baseEan",
+      headerName: "Base EAN",
+      field: "baseEan",
+      resizeable: true,
+      flex: 1,
+      minWidth: 100,
     },
     {
-      name: "Section",
-      selector: "section",
+      headerName: "Section",
+      field: "section",
+      flex: 1,
+      minWidth: 80,
     },
     {
-      name: "Type",
-      selector: "type",
+      headerName: "Type",
+      field: "type",
+      flex: 1,
+      minWidth: 80,
     },
     {
-      name: "Updated At",
-      selector: "updated_at",
-      format: (column) =>
-        new Date(column).toLocaleDateString("id-ID", {
+      headerName: "Updated At",
+      field: "updated_at",
+      valueGetter: (params) =>
+        new Date(params.row.updated_at).toLocaleDateString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
         }),
+      flex: 1,
+      minWidth: 100,
     },
   ];
 
-  const { handleDelete, handleMassDelete } = useDelete(
-    "master.products.destroy"
-  );
+  const { destroyMany } = useResource("master.users");
 
   return (
     <div>
-      <div className="mb-4">
-        <div className="flex space-x-3 items-center text-gray-500">
-          {can.create_Product && (
-            <Link href={route("master.products.create")}>
-              <Button>Create Product</Button>
-            </Link>
-          )}
-          {isSelected && (
-            <Button outline onClick={() => handleMassDelete(select)}>
-              Delete Selected ({select.length})
-            </Button>
-          )}
-        </div>
+      <Modal
+        open={select > -1}
+        onClose={() => setSelect(-1)}
+        aria-labelledby="modal-title"
+        keepMounted
+      >
+        <Box sx={{ maxWidth: 500 }} className="modal-bg">
+          <Typography id="modal-title" variant="h6" component="h2">
+            {select ? "Edit" : "Create"} Product
+          </Typography>
+          <Box>
+            <ProductForm
+              id={select}
+              onFinish={() => setSelect(-1)}
+              onCancel={() => setSelect(-1)}
+            />
+          </Box>
+        </Box>
+      </Modal>
+      <ButtonGroup
+        variant="text"
+        aria-label="outlined primary button group"
+        sx={{ marginBottom: 2 }}
+      >
+        {can.create_Product && (
+          <Button variant="contained" size="small" onClick={() => setSelect(0)}>
+            Create
+          </Button>
+        )}
+        {can.delete_Product && selectedRows.length > 0 && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => destroyMany(selectedRows)}
+          >
+            Delete ({selectedRows.length})
+          </Button>
+        )}
+      </ButtonGroup>
+      <div style={{ height: 400, width: "100%" }}>
+        <DataGrid
+          rows={products}
+          columns={columns}
+          rowsPerPageOptions={[25, 50, 100]}
+          onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          selectionModel={selectedRows}
+          checkboxSelection
+          density="compact"
+          autoHeight
+          disableSelectionOnClick
+          onRowDoubleClick={(params) => setSelect(params.row.id)}
+        />
       </div>
-
-      <Table
-        columns={columns}
-        data={products}
-        selectableRows
-        onSelectedRowsChange={(item) => onSelectChange(item.id)}
-        onSelectAll={setSelect}
-        selectedRows={select}
-        rowEdit={(row) => route("master.products.show", { id: row.id })}
-        rowDelete={(row) => handleDelete(row.id)}
-      />
     </div>
   );
 };

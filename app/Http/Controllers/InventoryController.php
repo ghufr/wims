@@ -12,7 +12,7 @@ class InventoryController extends Controller
     $this->authorize('viewAll', Inventory::class);
 
     return Inertia::render('Inventory/List/Index', [
-      'inventories' => Inventory::with(['product:id,name', 'warehouse:id,name', 'location:id,name'])->get()
+      'inventories' => Inventory::with(['product:id,name', 'warehouse:id,name', 'location:id,name', 'client:id,name'])->get()
     ]);
   }
 }

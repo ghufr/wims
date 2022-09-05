@@ -47,8 +47,8 @@ class VendorController extends Controller
   {
     $this->authorize('view', $vendor);
 
-    return Inertia::render('Master/Vendors/Create', [
-      "vendor" => $vendor
+    return response()->json([
+      'vendor' => $vendor
     ]);
   }
 

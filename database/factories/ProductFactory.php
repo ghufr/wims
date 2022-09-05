@@ -17,13 +17,18 @@ class ProductFactory extends Factory
   public function definition()
   {
 
+    $category = fake()->randomElement(['Pelagis', 'Cumi', 'Gurita', 'Kerang']);
+    $size = fake()->randomElement(['root', '6-8', '200', '800']);
+
     return [
-      'name' => strtoupper(fake()->lexify('ITEM-????')),
-      'description' => fake()->sentence(3),
+      'name' => strtoupper(fake()->numerify($category . '-' . $size . '-##')),
+      'description' => fake()->sentence(1),
       'section' => fake()->randomElement(['FAST', 'SLOW']),
       'baseEan' => fake()->ean13(),
-      'baseUom' => fake()->randomElement(['Kg', 'L', 'pcs']),
-      'type' => fake()->randomElement(['Beverage', 'Fishery', 'Meat', 'Vegetable']),
+      'baseUom' => fake()->randomElement(['Kg']),
+      'category' => $category,
+      'type' => fake()->randomElement(['Frozen', 'Fresh']),
+      'lifespan' => fake()->numberBetween(31, 100)
     ];
   }
 }

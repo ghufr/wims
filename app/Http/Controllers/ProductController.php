@@ -15,7 +15,7 @@ class ProductController extends Controller
     $this->authorize('viewAll', Product::class);
 
     return Inertia::render('Master/Products/Index', [
-      'products' => Product::all()
+      'products' => Product::orderBy('updated_at', 'desc')->get()
     ]);
   }
 
@@ -37,7 +37,10 @@ class ProductController extends Controller
       'baseEan' => 'required|unique:products,baseEan',
       'baseUom' => 'required',
       'type' => 'required',
+      'lifespan' => 'nullable',
+      'size' => 'nullable'
     ]);
+
     Product::create($validated);
 
     return Redirect::route('master.products.index');
@@ -47,8 +50,8 @@ class ProductController extends Controller
   {
     $this->authorize('view', $product);
 
-    return Inertia::render('Master/Products/Create', [
-      "product" => $product
+    return response()->json([
+      'product' => $product
     ]);
   }
 

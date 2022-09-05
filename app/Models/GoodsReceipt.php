@@ -13,7 +13,8 @@ class GoodsReceipt extends Model
     'grNo',
     'inboundNo',
     'reference',
-    'grDate'
+    'grDate',
+    'status'
   ];
 
   public function client()
@@ -37,7 +38,9 @@ class GoodsReceipt extends Model
       'name',
       'description',
       'baseUom',
-      'quantity'
+      'quantity',
+      'price',
+      'amount'
     ]);
   }
 }

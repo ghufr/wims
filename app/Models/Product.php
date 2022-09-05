@@ -20,6 +20,9 @@ class Product extends Model
     'section',
     'baseEan',
     'baseUom',
+    'category',
     'type',
+    'size',
+    'lifespan'
   ];
 }

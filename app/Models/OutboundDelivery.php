@@ -36,7 +36,9 @@ class OutboundDelivery extends Model
       'name',
       'description',
       'baseUom',
-      'quantity'
+      'quantity',
+      'price',
+      'amount'
     ]);
   }
 }

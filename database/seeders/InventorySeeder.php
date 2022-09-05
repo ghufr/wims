@@ -28,7 +28,8 @@ class InventorySeeder extends Seeder
         $inventory = [
           'product_id' => $product->id,
           'warehouse_id' => $receipt->warehouse->id,
-          'location_id' => $location->id
+          'location_id' => $location->id,
+          'client_id' => $receipt->client->id
         ];
 
         $existingInventory = Inventory::where($inventory)->get()->first();
@@ -36,10 +37,18 @@ class InventorySeeder extends Seeder
         if (empty($existingInventory)) {
           Inventory::create([
             ...$inventory,
-            'quantity' => $product->pivot->quantity
+            'quantity' => $product->pivot->quantity,
+            'avgPrice' => $product->pivot->price,
+            'baseUom' => $product->pivot->baseUom,
           ]);
         } else {
-          $existingInventory->increment('quantity', $product->pivot->quantity);
+          $nQuantity = $existingInventory->quantity + $product->pivot->quantity;
+          $oldAmount = $existingInventory->quantity * $existingInventory->avgPrice;
+          $nAmount = $product->pivot->amount;
+          $nAvgPrice = ($nAmount + $oldAmount) / $nQuantity;
+
+          $existingInventory->quantity = $nQuantity;
+          $existingInventory->avgPrice = $nAvgPrice;
         }
       }
     }

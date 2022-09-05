@@ -62,21 +62,25 @@ class UserController extends Controller
     return Redirect::route('master.users.index');
   }
 
-  public function show(User $user)
+  public function show($id)
   {
-    $this->authorize('update', $user);
+    $this->authorize('update', $id);
 
-    $permissions = Permission::all()->groupBy(function ($item, $key) {
-      return explode('_', $item['name'])[1];
-    });
+    // $permissions = Permission::all()->groupBy(function ($item, $key) {
+    //   return explode('_', $item['name'])[1];
+    // });
 
-    $roles = Role::all();
+    // $roles = Role::all();
 
-    return Inertia::render('Master/Users/Create', [
-      "userData" => $user->load('roles:id,name')->firstOrFail()->makeHidden(['password']),
-      'permissions' => $permissions,
-      'roles' => $roles,
+    return response()->json([
+      'user' => User::where('id', $id)->with('roles:id,name')->firstOrFail()->makeHidden(['password']),
     ]);
+
+    // return Inertia::render('Master/Users/Create', [
+    //   "userData" => $user->load('roles:id,name')->firstOrFail()->makeHidden(['password']),
+    //   'permissions' => $permissions,
+    //   'roles' => $roles,
+    // ]);
   }
 
   public function update(Request $request, User $user)

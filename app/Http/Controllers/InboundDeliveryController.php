@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\InboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;
+use App\Models\Warehouse;
 use App\Services\ProductService;
 use App\Services\Utils;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
@@ -21,8 +21,14 @@ class InboundDeliveryController extends Controller
    */
   public function index()
   {
+    $this->authorize('viewAll', InboundDelivery::class);
+
     return Inertia::render('Inbound/InboundDelivery/Index', [
-      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get()
+      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get(),
+      'warehouses' => Warehouse::all(['id', 'name', 'description']),
+      'clients' => Vendor::where('type', 'C')->get(),
+      'suppliers' => Vendor::where('type', 'S')->get(),
+      'products' => Product::all(['id', 'name', 'description', 'baseUom'])
     ]);
   }
 
@@ -49,8 +55,9 @@ class InboundDeliveryController extends Controller
     $this->authorize('create', InboundDelivery::class);
 
     $validated = $request->validate([
-      'client' => 'required|exists:vendors,name',
-      'supplier' => 'required|exists:vendors,name',
+      'client' => 'required|exists:vendors,id',
+      'supplier' => 'required|exists:vendors,id',
+      'warehouse' => 'required|exists:warehouses,id',
       'deliveryDate' => 'required|date',
       'products' => 'required|array',
     ]);
@@ -58,14 +65,16 @@ class InboundDeliveryController extends Controller
 
     $inboundDelivery = new InboundDelivery($validated);
 
-    $client = Vendor::where('name', $validated['client'])->firstOrFail();
-    $supplier = Vendor::where('name', $validated['supplier'])->firstOrFail();
+    // $client = Vendor::where('name', $validated['client'])->firstOrFail();
+    // $supplier = Vendor::where('name', $validated['supplier'])->firstOrFail();
 
     $count = InboundDelivery::where('deliveryDate', $validated['deliveryDate'])->count();
     $inboundDelivery->inboundNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 1);
 
-    $inboundDelivery->client()->associate($client);
-    $inboundDelivery->supplier()->associate($supplier);
+    $inboundDelivery->client()->associate($validated['client']);
+    $inboundDelivery->supplier()->associate($validated['supplier']);
+    $inboundDelivery->warehouse()->associate($validated['warehouse']);
+
     $inboundDelivery->save();
 
     $nProducts = $request->collect('products')->keyBy('id');
@@ -78,18 +87,18 @@ class InboundDeliveryController extends Controller
     return Redirect::route('inbound.delivery.index');
   }
 
-  public function show(InboundDelivery $inbound)
+  public function show(InboundDelivery $delivery)
   {
-    $this->authorize('view', $inbound);
+    $this->authorize('view', $delivery);
 
-    $inbound = $inbound->load(['client:id,name', 'supplier:id,name', 'products:id']);
-    $products = $inbound->products->map->pivot;
+    $delivery = $delivery->load(['client:id,name,description', 'supplier:id,name,description', 'products:id']);
+    $products = $delivery->products->map->pivot;
 
-    $inbound = $inbound->toArray();
-    $inbound['products'] = $products->toArray();
+    $delivery = $delivery->toArray();
+    $delivery['products'] = $products->toArray();
 
-    return Inertia::render('Inbound/InboundDelivery/Create', [
-      "inbound" =>  $inbound
+    return response()->json([
+      'inbound' => $delivery
     ]);
   }
 

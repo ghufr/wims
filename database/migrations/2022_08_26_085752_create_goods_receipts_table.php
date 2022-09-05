@@ -18,6 +18,7 @@ return new class extends Migration
       $table->string('grNo')->unique();
       $table->string('inboundNo')->nullable();
       $table->string('reference')->nullable();
+      $table->string('status')->default('OPEN');
       $table->date('grDate');
       $table->foreignId('warehouse_id')->constrained('warehouses')->restrictOnDelete();
       $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();
@@ -33,6 +34,7 @@ return new class extends Migration
    */
   public function down()
   {
+    Schema::dropIfExists('goods_receipt_product');
     Schema::dropIfExists('goods_receipts');
   }
 };

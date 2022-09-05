@@ -47,8 +47,8 @@ class CustomerController extends Controller
   {
     $this->authorize('view', $customer);
 
-    return Inertia::render('Master/Customers/Create', [
-      "customer" => $customer
+    return response()->json([
+      'customer' => $customer
     ]);
   }
 

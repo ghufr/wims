@@ -20,6 +20,8 @@ return new class extends Migration
       $table->string('description')->nullable();
       $table->string('baseUom')->default('Kg');
       $table->integer('quantity');
+      $table->integer('price');
+      $table->integer('amount');
     });
   }
 

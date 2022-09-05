@@ -16,7 +16,8 @@ class LocationController extends Controller
     $this->authorize('viewAll', Location::class);
 
     return Inertia::render('Master/Locations/Index', [
-      'locations' => Location::with('warehouse:id,name')->get()
+      'locations' => Location::with('warehouse:id,name')->get(),
+      'warehouses' => Warehouse::all(),
     ]);
   }
 
@@ -49,8 +50,8 @@ class LocationController extends Controller
   {
     $this->authorize('view', $location);
 
-    return Inertia::render('Master/Locations/Create', [
-      "location" => $location->load('warehouse:id,name')
+    return response()->json([
+      'location' => $location->load('warehouse:id,name')
     ]);
   }
 

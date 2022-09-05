@@ -23,8 +23,8 @@ class OutboundDeliveryFactory extends Factory
 
     return [
       'outboundNo' => fake()->ean13(),
-      'status' => fake()->randomElement(['OPEN', 'CLOSE']),
-      'deliveryDate' => fake()->dateTimeBetween('-1 week', '+1 week'),
+      'status' => fake()->randomElement(['OPEN', 'CLOSE', 'PROCESS']),
+      'deliveryDate' => fake()->dateTimeBetween('-1 week', '- 1 day'),
       'origin_id' => $origin,
       'dest_id' => $clients->last(),
       'client_id' => $clients->first()
