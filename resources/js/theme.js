@@ -10,6 +10,14 @@ export default createTheme({
         disableRipple: true, // No more ripple
       },
     },
+    MuiCssBaseline: {
+      styleOverrides: {
+        "*, *::before, *::after": {
+          transition: "none !important",
+          animation: "none !important",
+        },
+      },
+    },
   },
   palette: {
     type: "light",

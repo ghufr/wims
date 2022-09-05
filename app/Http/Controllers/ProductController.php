@@ -37,7 +37,10 @@ class ProductController extends Controller
       'baseEan' => 'required|unique:products,baseEan',
       'baseUom' => 'required',
       'type' => 'required',
+      'lifespan' => 'nullable',
+      'size' => 'nullable'
     ]);
+
     Product::create($validated);
 
     return Redirect::route('master.products.index');

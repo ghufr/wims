@@ -24,14 +24,14 @@ class DatabaseSeeder extends Seeder
       RolesAndPermissionsSeeder::class,
     );
 
-    Product::factory(100)->create();
+    Product::factory(25)->create();
     Warehouse::factory(10)->create()->each(function ($warehouse) {
       Location::factory(15)->create([
         'warehouse_id' => $warehouse->id
       ]);
     });
-    Vendor::factory()->count(100)->create();
-    Customer::factory()->count(100)->create();
+    Vendor::factory()->count(25)->create();
+    Customer::factory()->count(25)->create();
 
     $this->call(
       [

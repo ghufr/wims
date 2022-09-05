@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
+import Modal from "@/Components/Modal";
 
-import { ButtonGroup, Button, Modal, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import ProductForm from "@/Components/Forms/ProductForm";
 import useResource from "@/Hooks/useResource";
@@ -71,6 +72,7 @@ const ProductIndex = ({ products, can = {} }) => {
         open={select > -1}
         onClose={() => setSelect(-1)}
         aria-labelledby="modal-title"
+        keepMounted
       >
         <Box sx={{ maxWidth: 500 }} className="modal-bg">
           <Typography id="modal-title" variant="h6" component="h2">

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
+import Modal from "@/Components/Modal";
 
-import { ButtonGroup, Button, Modal, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import LocationForm from "@/Components/Forms/LocationForm";
 import useResource from "@/Hooks/useResource";

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\DeliveryOrder;
 use App\Models\Product;
+use App\Models\Vendor;
+use App\Models\Warehouse;
 use App\Services\ProductService;
 use App\Services\Utils;
 use Illuminate\Http\Request;
@@ -22,7 +25,11 @@ class DeliveryOrderController extends Controller
     $this->authorize('viewAll', DeliveryOrder::class);
 
     return Inertia::render('Outbound/DeliveryOrder/Index', [
-      'orders' => DeliveryOrder::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get()
+      'orders' => DeliveryOrder::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
+      'warehouses' => Warehouse::all(['id', 'name', 'description', 'address']),
+      'clients' => Vendor::where('type', 'C')->get(),
+      'customers' => Customer::all(['id', 'name', 'description', 'address']),
+      'products' => Product::all(['id', 'name', 'description', 'baseUom'])
     ]);
   }
 
@@ -73,20 +80,21 @@ class DeliveryOrderController extends Controller
     $order->products()->attach($nProducts);
     $order->save();
 
-    return Redirect::route('outbound.delivery.index');
+    return Redirect::route('outbound.order.index');
   }
 
   public function show(DeliveryOrder $order)
   {
     $this->authorize('view', $order);
 
-    $order = $order->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description']);
+    $order = $order->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description,baseUom']);
     $products = $order->products->map->pivot;
 
     $order = $order->toArray();
     $order['products'] = $products->toArray();
-    return Inertia::render('Outbound/DeliveryOrder/Create', [
-      "order" => $order
+
+    return response()->json([
+      'order' => $order
     ]);
   }
 
@@ -118,7 +126,7 @@ class DeliveryOrderController extends Controller
     $order->products()->attach($nProducts);
     $order->save();
 
-    return Redirect::route('outbound.delivery.index');
+    return Redirect::route('outbound.order.index');
   }
 
   /**
@@ -133,6 +141,6 @@ class DeliveryOrderController extends Controller
 
     $ids = explode(',', $id);
     DeliveryOrder::whereIn('id', $ids)->delete();
-    return Redirect::route('outbound.delivery.index');
+    return Redirect::route('outbound.order.index');
   }
 }

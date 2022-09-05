@@ -22,6 +22,7 @@ const ProductForm = ({ id, onFinish, onCancel }) => {
     baseUom: "Kg",
     section: "FAST",
     type: "Frozen",
+    lifespan: 60,
   });
 
   const resource = useResource("master.products");
@@ -32,13 +33,13 @@ const ProductForm = ({ id, onFinish, onCancel }) => {
       setInitialValues({ ...initialValues, ...data.product });
       setLoading(false);
     };
-    if (id) {
+    if (id > 0) {
       fetchData();
     }
   }, [id]);
 
   const handleSubmit = async (values) => {
-    if (id) {
+    if (id > 0) {
       await resource.update(id, values);
     } else {
       await resource.create(values);
@@ -150,6 +151,22 @@ const ProductForm = ({ id, onFinish, onCancel }) => {
               </Select>
             </FormControl>
 
+            <TextField
+              value={values.lifespan}
+              onChange={handleChange}
+              name="lifespan"
+              label="Lifespan (days)"
+              variant="standard"
+              error={errors.lifespan}
+              helperText={errors.lifespan}
+              autoFocus
+              fullWidth
+              margin="normal"
+              disabled={loading}
+              type="number"
+              required
+            />
+
             <Box sx={{ textAlign: "right", mt: 2 }}>
               <Button
                 variant="outlined"
@@ -164,8 +181,7 @@ const ProductForm = ({ id, onFinish, onCancel }) => {
                 variant="contained"
                 size="small"
                 type="submit"
-                loading={isSubmitting}
-                disabled={loading}
+                disabled={loading || isSubmitting}
               >
                 Save
               </Button>

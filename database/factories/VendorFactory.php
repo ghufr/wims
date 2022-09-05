@@ -16,8 +16,10 @@ class VendorFactory extends Factory
    */
   public function definition()
   {
+    $vendorType = rand(0, 1) === 1 ? 'C' : 'S';
     return [
-      'name' => strtoupper(fake()->lexify('V-????')),
+      'name' => strtoupper(fake()->lexify($vendorType . '-????')),
+      'type' => $vendorType,
       'description' => fake()->name(),
       'address' => fake()->streetAddress(),
       'address2' => fake()->secondaryAddress(),

@@ -21,7 +21,11 @@ return new class extends Migration
       $table->foreignIdFor(Product::class)->constrained();
       $table->foreignIdFor(Warehouse::class)->constrained();
       $table->foreignIdFor(Location::class)->constrained();
+      $table->foreignId('client_id')->nullable()->constrained('vendors')->restrictOnDelete();
+
       $table->integer('quantity')->min(0);
+      $table->float('avgPrice');
+      $table->string('baseUom')->default('Kg');
       $table->timestamps();
     });
   }

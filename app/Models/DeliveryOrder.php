@@ -13,7 +13,8 @@ class DeliveryOrder extends Model
     'doNo',
     'outNo',
     'deliveryDate',
-    'reference'
+    'reference',
+    'status'
   ];
 
   public function client()
@@ -37,7 +38,9 @@ class DeliveryOrder extends Model
       'name',
       'description',
       'baseUom',
-      'quantity'
+      'quantity',
+      'price',
+      'amount'
     ]);
   }
 }

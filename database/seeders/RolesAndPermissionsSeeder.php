@@ -37,14 +37,14 @@ class RolesAndPermissionsSeeder extends Seeder
     $methods = ['viewAll', 'view', 'create', 'delete', 'update'];
 
     $permissions = [];
-    $staffPermissions = [];
+    $readOnlyPermissions = [];
 
     foreach ($models as $model) {
       $permissions = [...$permissions, ...$this->crud($model, $methods)];
-      $staffPermissions =  [...$staffPermissions, ...['view_' . $model, 'viewAll_' . $model]];
+      $readOnlyPermissions =  [...$readOnlyPermissions, ...['view_' . $model, 'viewAll_' . $model]];
     }
 
-    $permissions = [...$permissions, ...$this->crud('User', $methods), ...$this->crud('Inventory', ['view', 'viewAll'])];
+    $permissions = [...$permissions, ...$this->crud('Dashboard', ['view', 'viewAll']), ...$this->crud('User', $methods), ...$this->crud('Inventory', ['view', 'viewAll'])];
 
     Permission::insertOrIgnore($permissions);
 
@@ -52,7 +52,10 @@ class RolesAndPermissionsSeeder extends Seeder
     $adminRole->givePermissionTo(Permission::all());
 
     $staffRole = Role::create(['name' => 'staff']);
-    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', ...$staffPermissions]);
+    $staffRole->givePermissionTo(['create_GoodsReceipt', 'create_DeliveryOrder', ...$readOnlyPermissions]);
+
+    $managerRole = Role::create(['name' => 'manager']);
+    $managerRole->givePermissionTo(['view_Dashboard', 'viewAll_Dashboard', ...$readOnlyPermissions]);
 
     $admin = User::factory()->create([
       'name' => 'Ghufron',
@@ -60,10 +63,11 @@ class RolesAndPermissionsSeeder extends Seeder
       'password' => Hash::make('admin123')
     ]);
 
-    $users = User::factory(5)->create();
+    $users = User::factory(10)->create();
 
     collect($users)->map(function ($user) {
-      $user->assignRole('staff');
+      $role = rand(0, 1) == 1 ? 'staff' : 'manager';
+      $user->assignRole($role);
     });
 
     $admin->assignRole('super-admin');

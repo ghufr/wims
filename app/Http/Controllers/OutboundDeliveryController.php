@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\OutboundDelivery;
 use App\Models\Product;
+use App\Models\Vendor;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -22,7 +25,11 @@ class OutboundDeliveryController extends Controller
     $this->authorize('viewAll', OutboundDelivery::class);
 
     return Inertia::render('Outbound/OutboundDelivery/Index', [
-      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get()
+      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
+      'warehouses' => Warehouse::all(['id', 'name', 'description', 'address']),
+      'clients' => Vendor::where('type', 'C')->get(),
+      'customers' => Customer::all(['id', 'name', 'description', 'address']),
+      'products' => Product::all(['id', 'name', 'description', 'baseUom'])
     ]);
   }
 
@@ -77,18 +84,18 @@ class OutboundDeliveryController extends Controller
     return Redirect::route('outbound.delivery.index');
   }
 
-  public function show(OutboundDelivery $outbound)
+  public function show(OutboundDelivery $delivery)
   {
-    $this->authorize('view', $outbound);
+    $this->authorize('view', $delivery);
 
-    $outbound = $outbound->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description']);
-    $products = $outbound->products->map->pivot;
+    $delivery = $delivery->load(['client:id,name,description', 'origin:id,name,description,address', 'destination:id,name,description,address', 'products:id']);
+    $products = $delivery->products->map->pivot;
 
-    $outbound = $outbound->toArray();
-    $outbound['products'] = $products->toArray();
-    return Inertia::render('Outbound/OutboundDelivery/Create', [
-      "outbound" => $outbound,
+    $delivery = $delivery->toArray();
+    $delivery['products'] = $products->toArray();
 
+    return response()->json([
+      'outbound' => $delivery
     ]);
   }
 

@@ -1,98 +1,159 @@
-import React from "react";
+import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
+import Modal from "@/Components/Modal";
 
-import { Link } from "@inertiajs/inertia-react";
-import Button from "@/Components/Button";
-import Table from "@/Components/Table";
-import useSelect from "@/Hooks/useSelect";
-import useDelete from "@/Hooks/useDelete";
+import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import useResource from "@/Hooks/useResource";
+import OutboundDeliveryForm from "@/Components/Forms/OutboundDeliveryForm";
 
-const OutboundIndex = ({ outbounds = {} }) => {
-  const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
+const OutboundDeliveryIndex = ({
+  outbounds,
+  warehouses,
+  clients,
+  customers,
+  products,
+  can,
+}) => {
+  const [select, setSelect] = useState(-1);
+  const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
-      name: "Out. No",
-      selector: "outboundNo",
+      headerName: "Out. No",
+      field: "outboundNo",
+      flex: 1,
+      minWidth: 100,
+      maxWidth: 150,
+      renderCell: (params) => (
+        <Button
+          sx={{ justifyContent: "flex-start", padding: 0 }}
+          fullWidth
+          onClick={() => setSelect(params.row.id)}
+        >
+          {params.row.outboundNo}
+        </Button>
+      ),
     },
     {
-      name: "Delv. Date",
-      selector: "deliveryDate",
+      headerName: "Delv. Date",
+      field: "deliveryDate",
+      minWidth: 100,
+    },
+    // {
+    //   headerName: "Client",
+    //   field: "client",
+    //   flex: 1,
+    //   minWidth: 80,
+    //   valueGetter: (params) => params.row.client.name,
+    // },
+    {
+      headerName: "Origin",
+      field: "origin.name",
+      valueGetter: (params) => params.row.origin.name,
     },
     {
-      name: "Origin",
-      selector: "origin",
-      format: (val) => val.name,
+      headerName: "Origin Addr.",
+      field: "origin.address",
+      valueGetter: (params) => params.row.origin.address,
     },
     {
-      name: "Origin Addr.",
-      selector: "origin",
-      format: (val) => val && val.address,
+      headerName: "Destination",
+      field: "destination.name",
+      valueGetter: (params) => params.row.destination.name,
+    },
+
+    {
+      headerName: "Destination Addr.",
+      field: "destination.address",
+      valueGetter: (params) => params.row.destination.address,
     },
     {
-      name: "Destination",
-      selector: "destination",
-      format: (val) => val.name,
+      headerName: "Status",
+      field: "status",
+      flex: 1,
+      minWidth: 80,
     },
     {
-      name: "Dest. Addr.",
-      selector: "destination",
-      format: (val) => val && val.address,
-    },
-    {
-      name: "Status",
-      selector: "status",
-    },
-    {
-      name: "Updated At",
-      selector: "updated_at",
-      format: (column) =>
-        new Date(column).toLocaleDateString("id-ID", {
+      headerName: "Updated At",
+      field: "updated_at",
+      valueGetter: (params) =>
+        new Date(params.row.updated_at).toLocaleDateString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
         }),
+      flex: 1,
+      minWidth: 100,
     },
   ];
 
-  const { handleDelete, handleMassDelete } = useDelete(
-    "outbound.delivery.destroy"
-  );
+  const { destroyMany } = useResource("outbound.delivery");
 
   return (
     <div>
-      <div className="mb-4">
-        <div className="flex space-x-3 items-center text-gray-500">
-          <Link href={route("outbound.delivery.create")}>
-            <Button>Create Outbound</Button>
-          </Link>
-          {isSelected && (
-            <>
-              <Button outline onClick={() => {}}>
-                Goods Receipt ({select.length})
-              </Button>
-              <Button outline onClick={() => handleMassDelete(select)}>
-                Delete Selected ({select.length})
-              </Button>
-            </>
-          )}
-        </div>
+      <Modal
+        open={select > -1}
+        onClose={() => setSelect(-1)}
+        aria-labelledby="modal-title"
+      >
+        <Box sx={{ maxWidth: 700 }} className="modal-bg">
+          <Typography id="modal-title" variant="h6" component="h2">
+            {select ? "Edit" : "Create"} Outbound Delivery
+          </Typography>
+          <Box>
+            <OutboundDeliveryForm
+              id={select}
+              onFinish={() => setSelect(-1)}
+              onCancel={() => setSelect(-1)}
+              data={{
+                warehouses,
+                clients,
+                customers,
+                products,
+              }}
+            />
+          </Box>
+        </Box>
+      </Modal>
+      <ButtonGroup
+        variant="text"
+        aria-label="outlined primary button group"
+        sx={{ marginBottom: 2 }}
+      >
+        {can.create_OutboundDelivery && (
+          <Button variant="contained" size="small" onClick={() => setSelect(0)}>
+            Create
+          </Button>
+        )}
+        {can.delete_OutboundDelivery && selectedRows.length > 0 && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => destroyMany(selectedRows)}
+          >
+            Delete ({selectedRows.length})
+          </Button>
+        )}
+      </ButtonGroup>
+      <div style={{ height: 400, width: "100%" }}>
+        <DataGrid
+          rows={outbounds}
+          columns={columns}
+          rowsPerPageOptions={[25, 50, 100]}
+          onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          selectionModel={selectedRows}
+          checkboxSelection
+          density="compact"
+          autoHeight
+          disableSelectionOnClick
+          onRowDoubleClick={(params) => setSelect(params.row.id)}
+        />
       </div>
-
-      <Table
-        columns={columns}
-        data={outbounds}
-        selectableRows
-        onSelectedRowsChange={(item) => onSelectChange(item.id)}
-        onSelectAll={setSelect}
-        selectedRows={select}
-        rowEdit={(row) => route("outbound.delivery.show", { id: row.id })}
-        rowDelete={(row) => handleDelete(row.id)}
-      />
     </div>
   );
 };
 
-OutboundIndex.layout = (page) => (
-  <Authenticated title="Outbounds">{page}</Authenticated>
+OutboundDeliveryIndex.layout = (page) => (
+  <Authenticated title="Outbound Delivery">{page}</Authenticated>
 );
 
-export default OutboundIndex;
+export default OutboundDeliveryIndex;

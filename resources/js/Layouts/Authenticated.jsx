@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 
 import {
   HiOutlineHome,
@@ -34,8 +34,8 @@ const renderMenu = (menu, padding = 4) => {
     const [open, setOpen] = useState(false);
     if (menu.children.filter((sub) => sub.show) < 1) return;
     return (
-      <>
-        <ListItem disablePadding key={menu.name + 1}>
+      <Fragment key={menu.name + "-head"}>
+        <ListItem disablePadding>
           <ListItemButton onClick={() => setOpen(!open)} dense>
             {/* <ListItemIcon> */}
             <menu.icon size={22} style={{ marginRight: 8 }} />
@@ -44,12 +44,12 @@ const renderMenu = (menu, padding = 4) => {
             {open ? <HiChevronUp /> : <HiChevronDown />}
           </ListItemButton>
         </ListItem>
-        <Collapse in={open} timeout="auto" unmountOnExit key={menu.name + 2}>
+        <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {menu.children.map((menu) => renderMenu(menu, 4))}
           </List>
         </Collapse>
-      </>
+      </Fragment>
     );
   }
 

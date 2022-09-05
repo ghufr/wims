@@ -19,6 +19,10 @@ class InboundDelivery extends Model
   {
     return $this->belongsTo(Vendor::class, 'supplier_id', 'id');
   }
+  public function warehouse()
+  {
+    return $this->belongsTo(Warehouse::class);
+  }
 
   public function client()
   {
@@ -31,7 +35,9 @@ class InboundDelivery extends Model
       'name',
       'description',
       'baseUom',
-      'quantity'
+      'quantity',
+      'price',
+      'amount'
     ]);
   }
 }

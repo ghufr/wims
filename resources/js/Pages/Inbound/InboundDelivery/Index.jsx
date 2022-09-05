@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 
-import { ButtonGroup, Button, Modal, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import Modal from "@/Components/Modal";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
+import InboundDeliveryForm from "@/Components/Forms/InboundDeliveryForm";
 
-const InboundIndex = ({ inbounds, can }) => {
+const InboundIndex = ({
+  inbounds,
+  warehouses,
+  clients,
+  suppliers,
+  products,
+  can,
+}) => {
   const [select, setSelect] = useState(-1);
   const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
@@ -74,14 +83,20 @@ const InboundIndex = ({ inbounds, can }) => {
       >
         <Box sx={{ maxWidth: 700 }} className="modal-bg">
           <Typography id="modal-title" variant="h6" component="h2">
-            {select ? "Edit" : "Create"} Product
+            {select > 0 ? "Edit" : "Create"} Inbound Delivery
           </Typography>
           <Box>
-            {/* <ProductForm
+            <InboundDeliveryForm
+              data={{
+                warehouses,
+                clients,
+                suppliers,
+                products,
+              }}
               id={select}
               onFinish={() => setSelect(-1)}
               onCancel={() => setSelect(-1)}
-            /> */}
+            />
           </Box>
         </Box>
       </Modal>
@@ -104,6 +119,11 @@ const InboundIndex = ({ inbounds, can }) => {
             Delete ({selectedRows.length})
           </Button>
         )}
+        {can.create_GoodsReceipt && selectedRows.length > 0 && (
+          <Button variant="outlined" color="success" size="small">
+            Goods Receipt ({selectedRows.length})
+          </Button>
+        )}
       </ButtonGroup>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
@@ -111,6 +131,7 @@ const InboundIndex = ({ inbounds, can }) => {
           columns={columns}
           rowsPerPageOptions={[25, 50, 100]}
           onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          isRowSelectable={(params) => params.row.status == "OPEN"}
           selectionModel={selectedRows}
           checkboxSelection
           density="compact"

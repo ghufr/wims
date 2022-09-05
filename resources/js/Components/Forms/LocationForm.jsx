@@ -20,9 +20,8 @@ const LocationForm = ({ id, data = {}, onFinish, onCancel }) => {
     name: "",
     type: "",
     section: "",
+    warehouse: "",
   });
-
-  console.log(data);
 
   const resource = useResource("master.locations");
 
@@ -32,13 +31,13 @@ const LocationForm = ({ id, data = {}, onFinish, onCancel }) => {
       setInitialValues({ ...initialValues, ...res.data.location });
       setLoading(false);
     };
-    if (id) {
+    if (id > 0) {
       fetchData();
     }
   }, [id]);
 
   const handleSubmit = async (values) => {
-    if (id) {
+    if (id > 0) {
       await resource.update(id, values);
     } else {
       await resource.create(values);
@@ -104,10 +103,13 @@ const LocationForm = ({ id, data = {}, onFinish, onCancel }) => {
               disablePortal
               fullWidth
               id="warehouse"
+              value={values.warehouse.name || ""}
+              onChange={handleChange}
               options={
                 data.warehouses &&
                 data.warehouses.map(({ name, description }) => ({
                   label: `${name} - ${description}`,
+                  value: name,
                 }))
               }
               renderInput={(params) => (
@@ -137,8 +139,7 @@ const LocationForm = ({ id, data = {}, onFinish, onCancel }) => {
                 variant="contained"
                 size="small"
                 type="submit"
-                loading={isSubmitting}
-                disabled={loading}
+                disabled={loading || isSubmitting}
               >
                 Save
               </Button>

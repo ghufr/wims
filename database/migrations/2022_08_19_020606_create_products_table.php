@@ -19,8 +19,11 @@ return new class extends Migration
       $table->string('description')->nullable();
       $table->enum('section', ['FAST', 'SLOW']);
       $table->string('baseEan')->unique()->nullable();
-      $table->string('baseUom');
-      $table->string('type')->default('REG');
+      $table->string('baseUom')->default('Kg');
+      $table->string('category')->nullable();
+      $table->string('type')->default('Frozen');
+      $table->integer('lifespan')->nullable();
+
       $table->timestamps();
     });
   }

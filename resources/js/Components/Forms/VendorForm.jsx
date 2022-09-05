@@ -33,13 +33,13 @@ const VendorForm = ({ id, onFinish, onCancel }) => {
       setInitialValues({ ...initialValues, ...data.vendor });
       setLoading(false);
     };
-    if (id) {
+    if (id > 0) {
       fetchData();
     }
   }, [id]);
 
   const handleSubmit = async (values) => {
-    if (id) {
+    if (id > 0) {
       await resource.update(id, values);
     } else {
       await resource.create(values);
@@ -184,8 +184,7 @@ const VendorForm = ({ id, onFinish, onCancel }) => {
                 variant="contained"
                 size="small"
                 type="submit"
-                loading={isSubmitting}
-                disabled={loading}
+                disabled={loading || isSubmitting}
               >
                 Save
               </Button>

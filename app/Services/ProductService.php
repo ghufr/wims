@@ -11,6 +11,8 @@ class ProductService
       $product = $products->where('id', $key)->firstOrFail()->only(['name', 'description', 'baseUom']);
       return [
         'quantity' => intval($item['quantity']),
+        'price' => intval($item['price']),
+        'amount' => intval($item['price']) * intval($item['quantity']),
         ...$product,
       ];
     });
