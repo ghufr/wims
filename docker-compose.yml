@@ -38,9 +38,11 @@ services:
         restart: unless-stopped
         ports:
             - 80:80
+            - 443:443
         volumes:
             - ./:/var/www
-            - ./docker-compose/nginx:/etc/nginx/conf.d/
+            - ./docker-compose/nginx/conf.d:/etc/nginx/conf.d/
+            - ./docker-compose/nginx/certs:/etc/nginx/certs/
         networks:
             - wms
 
