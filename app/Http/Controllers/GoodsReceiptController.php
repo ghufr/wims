@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodsReceipt;
+use App\Models\InboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\Warehouse;
@@ -28,7 +29,8 @@ class GoodsReceiptController extends Controller
       'warehouses' => Warehouse::all(['id', 'name', 'description']),
       'clients' => Vendor::where('type', 'C')->get(),
       'suppliers' => Vendor::where('type', 'S')->get(),
-      'products' => Product::all(['id', 'name', 'description', 'baseUom'])
+      'products' => Product::all(['id', 'name', 'description', 'baseUom']),
+      'query' => request()->all('inboundNo')
     ]);
   }
 
@@ -83,6 +85,62 @@ class GoodsReceiptController extends Controller
     $goodsReceipt->save();
 
     return Redirect::route('inbound.receipt.index');
+  }
+
+  public function fromInbound(Request $request)
+  {
+    $this->authorize('create', GoodsReceipt::class);
+
+    $validated = $request->validate([
+      'inboundIds' => 'required|array',
+      'grDate' => 'required',
+    ]);
+
+    $inbounds = InboundDelivery::with(['products:id'])->whereIn('id', $validated['inboundIds'])->get();
+
+    $count = GoodsReceipt::where('grDate', '=', $validated['grDate'])->count();
+
+
+    $index = 0;
+    foreach ($inbounds as $inbound) {
+      $goodsReceipt = new GoodsReceipt([
+        'inboundNo' => $inbound->inboundNo,
+        'grDate' => $validated['grDate'],
+      ]);
+
+      $goodsReceipt->grNo = Utils::generateIncrementNo($validated['grDate'], $count + $index, 1);
+      $goodsReceipt->client()->associate($inbound->client);
+      $goodsReceipt->supplier()->associate($inbound->supplier);
+      $goodsReceipt->warehouse()->associate($inbound->warehouse);
+
+      $goodsReceipt->save();
+
+      $products = $inbound->products->map->pivot;
+      $nProducts = $products->keyBy('product_id');
+      $nProducts->transform(function ($item, $key) {
+        return $item->only(['name', 'description', 'baseUom', 'price', 'quantity', 'amount']);
+      });
+
+      // dd($nProducts);
+
+
+
+
+      // $nProducts = $products->keyBy('product_id');
+      // $products = Product::whereIn('id', $nProducts->keys())->get();
+
+
+      $goodsReceipt->products()->attach($nProducts->toArray());
+      $goodsReceipt->save();
+
+
+      $inbound->status = 'CLOSE';
+      $inbound->save();
+
+      $index++;
+    }
+
+    return Redirect::route('inbound.delivery.index');
   }
 
   public function show(GoodsReceipt $receipt)

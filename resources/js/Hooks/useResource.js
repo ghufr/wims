@@ -11,7 +11,7 @@ const useResource = (resource) => {
   };
 
   const create = async (data) => {
-    return axios.post(route(`${resource}.store`), data);
+    return Inertia.post(route(`${resource}.store`), data);
   };
 
   const update = async (id, data) => {

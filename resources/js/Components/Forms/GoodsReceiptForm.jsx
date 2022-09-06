@@ -32,6 +32,7 @@ const GoodsReceiptForm = ({ id, data = {}, onFinish, onCancel }) => {
       setInitialValues({ ...initialValues, ...res.data.receipt });
       setLoading(res.data.receipt.reference != null);
     };
+
     if (id > 0) {
       fetchData();
     }

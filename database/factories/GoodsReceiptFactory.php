@@ -33,7 +33,8 @@ class GoodsReceiptFactory extends Factory
       'grDate' => $grDate,
       'client_id' => $inbound->client,
       'supplier_id' => $inbound->supplier,
-      'warehouse_id' => $warehouse
+      'warehouse_id' => $warehouse,
+      'status' => $reference != null ? 'CLOSE' : 'OPEN'
     ];
   }
 }

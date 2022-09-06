@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 
-import Modal from "@/Components/Modal";
+// import Modal from "@/Components/Modal";
+import PutawayForm from "@/Components/Forms/PutawayForm";
 
-import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography, Modal } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import GoodsReceiptForm from "@/Components/Forms/GoodsReceiptForm";
@@ -17,13 +18,14 @@ const GoodsReceiptIndex = ({
   can,
 }) => {
   const [select, setSelect] = useState(-1);
+  const [modal, setModal] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
       headerName: "GR. No",
       field: "grNo",
       flex: 1,
-      minWidth: 100,
+      minWidth: 130,
       maxWidth: 150,
       renderCell: (params) => (
         <Button
@@ -36,23 +38,36 @@ const GoodsReceiptIndex = ({
       ),
     },
     {
-      headerName: "GR Date",
-      field: "grDate",
-      minWidth: 100,
+      headerName: "Inb. No",
+      field: "inboundNo",
+      minWidth: 130,
+      flex: 1,
     },
     {
-      headerName: "Reference",
-      field: "reference",
-      flex: 1,
+      headerName: "GR Date",
+      field: "grDate",
       minWidth: 100,
     },
     {
       headerName: "Warehouse",
       field: "warehouse",
       flex: 1,
-      minWidth: 80,
+      minWidth: 100,
       valueGetter: (params) => params.row.warehouse.name,
     },
+
+    // {
+    //   headerName: "Status",
+    //   field: "status",
+    //   flex: 1,
+    //   minWidth: 80,
+    // },
+    // {
+    //   headerName: "Reference",
+    //   field: "reference",
+    //   flex: 1,
+    //   minWidth: 100,
+    // },
     {
       headerName: "Supplier",
       field: "status",
@@ -79,8 +94,11 @@ const GoodsReceiptIndex = ({
       minWidth: 100,
     },
   ];
+  // const [initialValues, setInitialValues] = useState();
 
   const { destroyMany } = useResource("inbound.receipt");
+
+  const handlePutaway = () => {};
 
   return (
     <div>
@@ -103,6 +121,20 @@ const GoodsReceiptIndex = ({
           </Box>
         </Box>
       </Modal>
+
+      <Modal
+        open={modal === "putaway"}
+        onClose={() => setModal("")}
+        aria-labelledby="modal-title"
+      >
+        <Box sx={{ maxWidth: 700 }} className="modal-bg">
+          <Typography id="modal-title" variant="h6" component="h2">
+            Putaway List
+          </Typography>
+          <PutawayForm />
+        </Box>
+      </Modal>
+
       <ButtonGroup
         variant="text"
         aria-label="outlined primary button group"
@@ -124,7 +156,12 @@ const GoodsReceiptIndex = ({
           </Button>
         )}
         {can.create_GoodsReceipt && selectedRows.length > 0 && (
-          <Button variant="outlined" color="success" size="small">
+          <Button
+            variant="outlined"
+            color="success"
+            size="small"
+            onClick={() => setModal("putaway")}
+          >
             Putaway ({selectedRows.length})
           </Button>
         )}
@@ -135,6 +172,9 @@ const GoodsReceiptIndex = ({
           columns={columns}
           rowsPerPageOptions={[25, 50, 100]}
           onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          isRowSelectable={(params) =>
+            params.row.status == "OPEN" && !params.row.reference
+          }
           selectionModel={selectedRows}
           checkboxSelection
           density="compact"
@@ -145,59 +185,6 @@ const GoodsReceiptIndex = ({
       </div>
     </div>
   );
-
-  // const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
-  // const columns = [
-
-  //   {
-  //     name: "Updated At",
-  //     selector: "updated_at",
-  //     format: (column) =>
-  //       new Date(column).toLocaleDateString("id-ID", {
-  //         hour: "2-digit",
-  //         minute: "2-digit",
-  //       }),
-  //   },
-  // ];
-
-  // const { handleDelete, handleMassDelete } = useDelete(
-  //   "inbound.delivery.destroy"
-  // );
-
-  // return (
-  //   <div>
-  //     <div className="mb-4">
-  //       <div className="flex space-x-3 items-center text-gray-500">
-  //         <Link href={route("inbound.delivery.create")}>
-  //           <Button>Create GoodsReceipt</Button>
-  //         </Link>
-  //         {isSelected && (
-  //           <>
-  //             <Button outline onClick={() => {}}>
-  //               Goods Receipt ({select.length})
-  //             </Button>
-  //             <Button outline onClick={() => handleMassDelete(select)}>
-  //               Delete Selected ({select.length})
-  //             </Button>
-  //           </>
-  //         )}
-  //       </div>
-  //     </div>
-
-  //     {/* <DataGrid rows={receipts} columns={columns} /> */}
-
-  //     <Table
-  //       columns={columns}
-  //       data={receipts}
-  //       selectableRows
-  //       onSelectedRowsChange={(item) => onSelectChange(item.id)}
-  //       onSelectAll={setSelect}
-  //       selectedRows={select}
-  //       rowEdit={(row) => route("inbound.delivery.show", { id: row.id })}
-  //       rowDelete={(row) => handleDelete(row.id)}
-  //     />
-  //   </div>
-  // );
 };
 
 GoodsReceiptIndex.layout = (page) => (

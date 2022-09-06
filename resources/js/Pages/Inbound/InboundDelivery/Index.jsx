@@ -1,11 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 
-import { ButtonGroup, Button, Box, Typography } from "@mui/material";
-import Modal from "@/Components/Modal";
+import {
+  ButtonGroup,
+  Button,
+  Box,
+  Typography,
+  Modal,
+  TextField,
+} from "@mui/material";
+// import Modal from "@/Components/Modal";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import InboundDeliveryForm from "@/Components/Forms/InboundDeliveryForm";
+import axios from "axios";
+import { Inertia } from "@inertiajs/inertia";
 
 const InboundIndex = ({
   inbounds,
@@ -13,9 +22,11 @@ const InboundIndex = ({
   clients,
   suppliers,
   products,
+  // inbound,
   can,
 }) => {
   const [select, setSelect] = useState(-1);
+  const [modal, setModal] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
@@ -38,6 +49,13 @@ const InboundIndex = ({
       headerName: "Delv. Date",
       field: "deliveryDate",
       minWidth: 100,
+    },
+    {
+      headerName: "Warehouse",
+      field: "warehouse",
+      flex: 1,
+      minWidth: 100,
+      valueGetter: (params) => params.row.warehouse.name,
     },
     {
       headerName: "Supplier",
@@ -72,6 +90,18 @@ const InboundIndex = ({
     },
   ];
 
+  const handleStoreMany = async (e) => {
+    e.preventDefault();
+    const data = {
+      inboundIds: selectedRows,
+      grDate: e.target.grDate.value,
+    };
+
+    await Inertia.post(route("inbound.receipt.from.inbound"), data).then(
+      (res) => res.data
+    );
+  };
+
   const { destroyMany } = useResource("inbound.delivery");
 
   return (
@@ -100,6 +130,30 @@ const InboundIndex = ({
           </Box>
         </Box>
       </Modal>
+      <Modal open={modal === "goodsReceipt"} onClose={() => {}}>
+        <Box sx={{ maxWidth: 400 }} className="modal-bg">
+          <Box component="form" onSubmit={handleStoreMany}>
+            <TextField
+              name="grDate"
+              label="GR. Date"
+              size="small"
+              autoFocus
+              fullWidth
+              margin="dense"
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              required
+            />
+            <Box textAlign="right" sx={{ mt: 2 }}>
+              <Button type="submit" variant="contained">
+                Submit
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
       <ButtonGroup
         variant="text"
         aria-label="outlined primary button group"
@@ -120,7 +174,12 @@ const InboundIndex = ({
           </Button>
         )}
         {can.create_GoodsReceipt && selectedRows.length > 0 && (
-          <Button variant="outlined" color="success" size="small">
+          <Button
+            variant="outlined"
+            color="success"
+            size="small"
+            onClick={() => setModal("goodsReceipt")}
+          >
             Goods Receipt ({selectedRows.length})
           </Button>
         )}
@@ -142,59 +201,6 @@ const InboundIndex = ({
       </div>
     </div>
   );
-
-  // const { select, isSelected, onSelectChange, setSelect } = useSelect([]);
-  // const columns = [
-
-  //   {
-  //     name: "Updated At",
-  //     selector: "updated_at",
-  //     format: (column) =>
-  //       new Date(column).toLocaleDateString("id-ID", {
-  //         hour: "2-digit",
-  //         minute: "2-digit",
-  //       }),
-  //   },
-  // ];
-
-  // const { handleDelete, handleMassDelete } = useDelete(
-  //   "inbound.delivery.destroy"
-  // );
-
-  // return (
-  //   <div>
-  //     <div className="mb-4">
-  //       <div className="flex space-x-3 items-center text-gray-500">
-  //         <Link href={route("inbound.delivery.create")}>
-  //           <Button>Create Inbound</Button>
-  //         </Link>
-  //         {isSelected && (
-  //           <>
-  //             <Button outline onClick={() => {}}>
-  //               Goods Receipt ({select.length})
-  //             </Button>
-  //             <Button outline onClick={() => handleMassDelete(select)}>
-  //               Delete Selected ({select.length})
-  //             </Button>
-  //           </>
-  //         )}
-  //       </div>
-  //     </div>
-
-  //     {/* <DataGrid rows={inbounds} columns={columns} /> */}
-
-  //     <Table
-  //       columns={columns}
-  //       data={inbounds}
-  //       selectableRows
-  //       onSelectedRowsChange={(item) => onSelectChange(item.id)}
-  //       onSelectAll={setSelect}
-  //       selectedRows={select}
-  //       rowEdit={(row) => route("inbound.delivery.show", { id: row.id })}
-  //       rowDelete={(row) => handleDelete(row.id)}
-  //     />
-  //   </div>
-  // );
 };
 
 InboundIndex.layout = (page) => (

@@ -19,6 +19,7 @@ class InboundDelivery extends Model
   {
     return $this->belongsTo(Vendor::class, 'supplier_id', 'id');
   }
+
   public function warehouse()
   {
     return $this->belongsTo(Warehouse::class);

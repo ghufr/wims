@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 
-import Modal from "@/Components/Modal";
+// import Modal from "@/Components/Modal";
 
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Modal } from "@mui/material";
 // import useResource from "@/Hooks/useResource";
 
 const InventoryListIndex = ({ inventories }) => {

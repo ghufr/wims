@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,8 +19,10 @@ return new class extends Migration
       $table->string('inboundNo')->unique();
       $table->string('status')->default('OPEN');
       $table->date('deliveryDate');
-      $table->foreignId('client_id')->nullable()->constrained('customers')->restrictOnDelete();
+      $table->foreignId('client_id')->constrained('customers')->restrictOnDelete();
       $table->foreignId('supplier_id')->constrained('vendors')->restrictOnDelete();
+      $table->foreignIdFor(Warehouse::class)->constrained();
+
       $table->timestamps();
     });
   }

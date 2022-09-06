@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
-import Modal from "@/Components/Modal";
+// import Modal from "@/Components/Modal";
 
-import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography, Modal } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import WarehouseForm from "@/Components/Forms/WarehouseForm";
 import useResource from "@/Hooks/useResource";

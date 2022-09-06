@@ -39,12 +39,12 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                     fullWidth
                     margin="none"
                     size="small"
-                    readOnly={loading}
+                    disabled={loading}
                     required
                   /> */}
                     <Autocomplete
                       disablePortal
-                      readOnly={loading}
+                      disabled={loading}
                       fullWidth
                       size="small"
                       id="product"
@@ -106,7 +106,7 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                       fullWidth
                       margin="none"
                       size="small"
-                      readOnly={loading}
+                      disabled={loading}
                       required
                       InputProps={{
                         endAdornment: (
@@ -132,7 +132,7 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                       fullWidth
                       margin="none"
                       size="small"
-                      readOnly={loading}
+                      disabled={loading}
                       required
                     ></TextField>
                   </td>

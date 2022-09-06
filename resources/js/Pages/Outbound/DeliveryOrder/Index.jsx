@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
-import Modal from "@/Components/Modal";
+// import Modal from "@/Components/Modal";
 
-import { ButtonGroup, Button, Box, Typography } from "@mui/material";
+import { ButtonGroup, Button, Box, Typography, Modal } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import DeliveryOrderForm from "@/Components/Forms/DeliveryOrderForm";
@@ -101,7 +101,7 @@ const DeliveryOrderIndex = ({
       >
         <Box sx={{ maxWidth: 700 }} className="modal-bg">
           <Typography id="modal-title" variant="h6" component="h2">
-            {select ? "Edit" : "Create"} Product
+            {select ? "Edit" : "Create"} Delivery Order
           </Typography>
           <Box>
             <DeliveryOrderForm

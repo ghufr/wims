@@ -21,6 +21,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
     supplier: {},
     products: [{ name: "", description: "" }],
     warehouse: {},
+    status: "",
   });
 
   const resource = useResource("inbound.delivery");
@@ -29,26 +30,28 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
     const fetchData = async () => {
       const res = await resource.findById(id);
       setInitialValues({ ...initialValues, ...res.data.inbound });
-      setLoading(res.data.outbound.status != "OPEN");
+      setLoading(res.data.inbound.status != "OPEN");
     };
     if (id > 0) {
       fetchData();
     }
   }, [id]);
 
+  const transform = (values) => ({
+    deliveryDate: values.deliveryDate,
+    inboundNo: values.inboundNo,
+    client: values.client.id,
+    supplier: values.supplier.id,
+    warehouse: values.warehouse.id,
+    products: values.products.map((product) => ({
+      id: product.id,
+      quantity: product.quantity,
+      price: product.price,
+    })),
+  });
+
   const handleSubmit = async (values) => {
-    const data = {
-      deliveryDate: values.deliveryDate,
-      // inboundNo: values.inboundNo || null,
-      client: values.client.id,
-      supplier: values.supplier.id,
-      warehouse: values.warehouse.id,
-      products: values.products.map((product) => ({
-        id: product.id,
-        quantity: product.quantity,
-        price: product.price,
-      })),
-    };
+    const data = transform(values);
     if (id > 0) {
       await resource.update(id, data);
     } else {
@@ -78,12 +81,11 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
               fullWidth
               margin="dense"
               type="text"
-              readOnly={loading}
               disabled
             />
             <Autocomplete
               disablePortal
-              readOnly={loading}
+              disabled={loading}
               fullWidth
               id="client"
               name="client"
@@ -120,7 +122,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
             />
             <Autocomplete
               disablePortal
-              readOnly={loading}
+              disabled={loading}
               fullWidth
               id="warehouse"
               value={values.warehouse.name || ""}
@@ -157,7 +159,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
 
             <Autocomplete
               disablePortal
-              readOnly={loading}
+              disabled={loading}
               fullWidth
               id="supplier"
               value={values.supplier.name || ""}
@@ -207,7 +209,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              readOnly={loading}
+              disabled={loading}
               required
             />
 

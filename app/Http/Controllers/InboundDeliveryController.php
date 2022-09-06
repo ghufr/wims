@@ -24,11 +24,11 @@ class InboundDeliveryController extends Controller
     $this->authorize('viewAll', InboundDelivery::class);
 
     return Inertia::render('Inbound/InboundDelivery/Index', [
-      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get(),
+      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->get(),
       'warehouses' => Warehouse::all(['id', 'name', 'description']),
       'clients' => Vendor::where('type', 'C')->get(),
       'suppliers' => Vendor::where('type', 'S')->get(),
-      'products' => Product::all(['id', 'name', 'description', 'baseUom'])
+      'products' => Product::all(['id', 'name', 'description', 'baseUom']),
     ]);
   }
 
@@ -84,14 +84,21 @@ class InboundDeliveryController extends Controller
     $inboundDelivery->products()->attach($nProducts);
     $inboundDelivery->save();
 
-    return Redirect::route('inbound.delivery.index');
+    return Inertia::render('Inbound/InboundDelivery/Index', [
+      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get(),
+      'warehouses' => Warehouse::all(['id', 'name', 'description']),
+      'clients' => Vendor::where('type', 'C')->get(),
+      'suppliers' => Vendor::where('type', 'S')->get(),
+      'products' => Product::all(['id', 'name', 'description', 'baseUom']),
+      'inbound' => $inboundDelivery->toArray()
+    ]);
   }
 
   public function show(InboundDelivery $delivery)
   {
     $this->authorize('view', $delivery);
 
-    $delivery = $delivery->load(['client:id,name,description', 'supplier:id,name,description', 'products:id']);
+    $delivery = $delivery->load(['client:id,name,description', 'supplier:id,name,description', 'products:id', 'warehouse:id,name,description']);
     $products = $delivery->products->map->pivot;
 
     $delivery = $delivery->toArray();

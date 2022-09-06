@@ -30,6 +30,7 @@ Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'web
 
 
 Route::prefix('inbound')->name('inbound.')->middleware(['auth', 'web'])->group(function () {
+  Route::post('receipt/form-inbound', [GoodsReceiptController::class, 'fromInbound'])->name('receipt.from.inbound');
   Route::resources(
     [
       'delivery' => InboundDeliveryController::class,
