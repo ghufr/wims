@@ -14,7 +14,7 @@ class CustomerController extends Controller
     $this->authorize('viewAll', Customer::class);
 
     return Inertia::render('Master/Customers/Index', [
-      'customers' => Customer::all()
+      'customers' => Customer::orderBy('updated_at', 'desc')->get()
     ]);
   }
 

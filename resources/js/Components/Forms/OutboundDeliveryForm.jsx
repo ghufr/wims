@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import {
   Box,
   Button,
-  Autocomplete,
-  TextField,
   Typography,
+  TextField as MuiTextField,
 } from "@mui/material";
+
+import { Autocomplete, TextField } from "formik-mui";
 import { useState } from "react";
 import useResource from "@/Hooks/useResource";
 import ProductListForm from "./Shared/ProductListForm";
@@ -18,7 +19,7 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
     outboundNo: "",
     deliveryDate: "",
     client: {},
-    products: [{ name: "", description: "" }],
+    products: [{}],
     origin: {},
     destination: {},
   });
@@ -29,6 +30,7 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
     const fetchData = async () => {
       const res = await resource.findById(id);
       setInitialValues({ ...initialValues, ...res.data.outbound });
+
       setLoading(res.data.outbound.status != "OPEN");
     };
     if (id > 0) {
@@ -39,14 +41,14 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
   const handleSubmit = async (values) => {
     const data = {
       deliveryDate: values.deliveryDate,
-      // inboundNo: values.inboundNo || null,
       client: values.client.id,
       origin: values.origin.id,
       destination: values.destination.id,
       products: values.products.map((product) => ({
-        id: product.id,
+        id: product.id || product.product_id,
         quantity: product.quantity,
         price: product.price,
+        outbound_delivery_id: product.outbound_delivery_id,
       })),
     };
     if (id > 0) {
@@ -64,50 +66,29 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
         initialValues={initialValues}
         onSubmit={handleSubmit}
       >
-        {({ values, errors, handleChange, setFieldValue, isSubmitting }) => (
+        {({ values, setFieldValue, isSubmitting }) => (
           <Form>
-            <TextField
-              value={values.outboundNo}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="outboundNo"
-              label="Inb. No"
+              label="Out. No"
               size="small"
-              error={errors.outboundNo}
-              helperText={errors.outboundNo}
-              autoFocus
               fullWidth
               margin="dense"
               type="text"
-              readOnly={loading}
               disabled
             />
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="client"
+            <Field
               name="client"
-              value={values.client.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("client", nVal || {});
-              }}
-              inputValue={
-                values.client.name
-                  ? `${values.client.name} - ${values.client.description}`
-                  : ""
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.clients &&
-                data.clients.map(({ name, description, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.clients}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Client"
                   size="small"
@@ -118,33 +99,17 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
                 />
               )}
             />
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="origin"
-              value={values.origin.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("origin", nVal || {});
-              }}
-              inputValue={
-                values.origin.name
-                  ? `${values.origin.name} - ${values.origin.description}`
-                  : ""
+            <Field
+              name="origin"
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.warehouses &&
-                data.warehouses.map(({ name, description, address, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                  address,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.warehouses}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Origin"
                   size="small"
@@ -152,38 +117,21 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
                   fullWidth
                   name="origin"
                   margin="dense"
-                  helperText={(values.origin && values.origin.address) || ""}
                 />
               )}
             />
 
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="destination"
-              value={values.destination.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("destination", nVal || {});
-              }}
-              inputValue={
-                values.destination.name
-                  ? `${values.destination.name} - ${values.destination.description}`
-                  : ""
+            <Field
+              name="destination"
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.customers &&
-                data.customers.map(({ name, description, address, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                  address,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.customers}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Destination"
                   size="small"
@@ -191,29 +139,22 @@ const OutboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
                   fullWidth
                   name="destination"
                   margin="dense"
-                  helperText={
-                    (values.destination && values.destination.address) || ""
-                  }
                 />
               )}
             />
 
-            <TextField
-              value={values.deliveryDate}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="deliveryDate"
               label="Delv. Date"
               size="small"
-              error={errors.deliveryDate}
-              helperText={errors.deliveryDate}
-              autoFocus
               fullWidth
               margin="dense"
               type="date"
               InputLabelProps={{
                 shrink: true,
               }}
-              readOnly={loading}
+              disabled={loading}
               required
             />
 

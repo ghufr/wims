@@ -20,7 +20,7 @@ class UserController extends Controller
     $this->authorize('viewAll', User::class);
 
     return Inertia::render('Master/Users/Index', [
-      'users' => User::with('roles:id,name')->get()->makeHidden(['password'])
+      'users' => User::with('roles:id,name')->orderBy('created_at', 'desc')->get()->makeHidden(['password'])
     ]);
   }
 
@@ -43,10 +43,11 @@ class UserController extends Controller
   {
     $this->authorize('create', User::class);
 
-    $request->validate([
+    $validated = $request->validate([
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users',
       'password' => ['required', Rules\Password::defaults()],
+      'role' => 'required|string'
     ]);
 
     $user = User::create([
@@ -55,16 +56,18 @@ class UserController extends Controller
       'password' => Hash::make($request->password),
     ]);
 
+    $user->assignRole($validated['role']);
+
     event(new Registered($user));
 
-    Auth::login($user);
+    // Auth::login($user);
 
     return Redirect::route('master.users.index');
   }
 
   public function show($id)
   {
-    $this->authorize('update', $id);
+    $this->authorize('view', $id);
 
     // $permissions = Permission::all()->groupBy(function ($item, $key) {
     //   return explode('_', $item['name'])[1];
@@ -87,19 +90,20 @@ class UserController extends Controller
   {
     $this->authorize('update', $user);
 
-    $request->validate([
+    $validated = $request->validate([
       'name' => 'required|string|max:255',
       'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-      // 'permissions'
+      'password' => ['sometimes', Rules\Password::defaults()],
+      'role' => 'required|string'
     ]);
-
-    // $user->givePermissionTo('');
 
     $user->update([
       'name' => $request->name,
       'email' => $request->email,
       'password' => $request->password ? Hash::make($request->password) : $user->password,
     ]);
+
+    $user->syncRoles([$validated['role']]);
 
     return Redirect::route('master.users.index');
   }

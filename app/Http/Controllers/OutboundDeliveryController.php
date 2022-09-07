@@ -25,7 +25,7 @@ class OutboundDeliveryController extends Controller
     $this->authorize('viewAll', OutboundDelivery::class);
 
     return Inertia::render('Outbound/OutboundDelivery/Index', [
-      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
+      'outbounds' => OutboundDelivery::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->orderBy('updated_at', 'desc')->get(),
       'warehouses' => Warehouse::all(['id', 'name', 'description', 'address']),
       'clients' => Vendor::where('type', 'C')->get(),
       'customers' => Customer::all(['id', 'name', 'description', 'address']),
@@ -58,7 +58,6 @@ class OutboundDeliveryController extends Controller
     $validated = $request->validate([
       'deliveryDate' => 'required|date',
       'products' => 'required|array',
-      'outboundNo' => 'sometimes|exists:outbound_deliveries,outboundNo',
       'client' => 'required|exists:customers,id',
       'origin' => 'required|exists:warehouses,id',
       'destination' => 'required|exists:customers,id'
@@ -99,12 +98,34 @@ class OutboundDeliveryController extends Controller
     ]);
   }
 
-
-  public function update(Request $request, OutboundDelivery $outbound)
+  public function update(Request $request, OutboundDelivery $delivery)
   {
-    $this->authorize('update', $outbound);
+    $this->authorize('update', $delivery);
 
-    //
+    $validated = $request->validate([
+      'deliveryDate' => 'required|date',
+      'products' => 'required|array',
+      'client' => 'required|exists:customers,id',
+      'origin' => 'required|exists:warehouses,id',
+      'destination' => 'required|exists:customers,id',
+      'products' => 'required|array'
+    ]);
+
+
+    $delivery->client()->associate($validated['client']);
+    $delivery->origin()->associate($validated['origin']);
+    $delivery->destination()->associate($validated['destination']);
+    // $delivery->update();
+
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
+
+
+    $delivery->products()->sync($nProducts);
+    $delivery->save();
+
+    return Redirect::route('outbound.delivery.index');
   }
 
   /**

@@ -100,6 +100,7 @@ const InboundIndex = ({
     await Inertia.post(route("inbound.receipt.from.inbound"), data).then(
       (res) => res.data
     );
+    setModal("");
   };
 
   const { destroyMany } = useResource("inbound.delivery");
@@ -130,7 +131,12 @@ const InboundIndex = ({
           </Box>
         </Box>
       </Modal>
-      <Modal open={modal === "goodsReceipt"} onClose={() => {}}>
+      <Modal
+        open={modal === "goodsReceipt"}
+        onClose={() => {
+          setModal("");
+        }}
+      >
         <Box sx={{ maxWidth: 400 }} className="modal-bg">
           <Box component="form" onSubmit={handleStoreMany}>
             <TextField

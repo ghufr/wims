@@ -25,7 +25,7 @@ class GoodsReceiptController extends Controller
     $this->authorize('viewAll', GoodsReceipt::class);
 
     return Inertia::render('Inbound/GoodsReceipt/Index', [
-      'receipts' => GoodsReceipt::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->get(),
+      'receipts' => GoodsReceipt::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->orderBy('updated_at', 'desc')->get(),
       'warehouses' => Warehouse::all(['id', 'name', 'description']),
       'clients' => Vendor::where('type', 'C')->get(),
       'suppliers' => Vendor::where('type', 'S')->get(),

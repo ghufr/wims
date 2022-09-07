@@ -25,7 +25,7 @@ class DeliveryOrderController extends Controller
     $this->authorize('viewAll', DeliveryOrder::class);
 
     return Inertia::render('Outbound/DeliveryOrder/Index', [
-      'orders' => DeliveryOrder::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->get(),
+      'orders' => DeliveryOrder::with(['client:id,name', 'origin:id,name,address', 'destination:id,name,address'])->orderBy('updated_at', 'desc')->get(),
       'warehouses' => Warehouse::all(['id', 'name', 'description', 'address']),
       'clients' => Vendor::where('type', 'C')->get(),
       'customers' => Customer::all(['id', 'name', 'description', 'address']),
@@ -87,7 +87,7 @@ class DeliveryOrderController extends Controller
   {
     $this->authorize('view', $order);
 
-    $order = $order->load(['client:id,name', 'origin:id,name,address', 'destination:id,name,address', 'products:id,name,description,baseUom']);
+    $order = $order->load(['client:id,name,description', 'origin:id,name,description,address', 'destination:id,name,description,address', 'products:id,name,description,baseUom']);
     $products = $order->products->map->pivot;
 
     $order = $order->toArray();
@@ -110,20 +110,15 @@ class DeliveryOrderController extends Controller
       'destination' => 'required|exists:customers,id'
     ]);
 
-
-    $count = DeliveryOrder::where('deliveryDate', '=', $validated['deliveryDate'])->count();
-    $order->doNo = Utils::generateIncrementNo($validated['deliveryDate'], $count, 4);
-
     $order->client()->associate($validated['client']);
     $order->origin()->associate($validated['origin']);
     $order->destination()->associate($validated['destination']);
-    $order->save();
 
     $nProducts = $request->collect('products')->keyBy('id');
     $products = Product::whereIn('id', $nProducts->keys())->get();
     $nProducts = ProductService::transform($nProducts, $products);
 
-    $order->products()->attach($nProducts);
+    $order->products()->sync($nProducts);
     $order->save();
 
     return Redirect::route('outbound.order.index');

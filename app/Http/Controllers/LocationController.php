@@ -16,7 +16,7 @@ class LocationController extends Controller
     $this->authorize('viewAll', Location::class);
 
     return Inertia::render('Master/Locations/Index', [
-      'locations' => Location::with('warehouse:id,name')->get(),
+      'locations' => Location::with('warehouse:id,name')->orderBy('updated_at', 'desc')->get(),
       'warehouses' => Warehouse::all(),
     ]);
   }

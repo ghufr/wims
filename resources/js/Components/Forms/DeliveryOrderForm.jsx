@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
 
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import {
   Box,
   Button,
-  Autocomplete,
-  TextField,
   Typography,
+  TextField as MuiTextField,
 } from "@mui/material";
+
+import { Autocomplete, TextField } from "formik-mui";
+
 import { useState } from "react";
 import useResource from "@/Hooks/useResource";
 import ProductListForm from "./Shared/ProductListForm";
@@ -37,19 +39,20 @@ const DeliveryOrderForm = ({ id, data = {}, onFinish, onCancel }) => {
     }
   }, [id]);
 
+  const transform = (values) => ({
+    deliveryDate: values.deliveryDate,
+    client: values.client.id,
+    origin: values.origin.id,
+    destination: values.destination.id,
+    products: values.products.map((product) => ({
+      id: product.id || product.product_id,
+      quantity: product.quantity,
+      price: product.price,
+    })),
+  });
+
   const handleSubmit = async (values) => {
-    const data = {
-      deliveryDate: values.deliveryDate,
-      // inboundNo: values.inboundNo || null,
-      client: values.client.id,
-      origin: values.origin.id,
-      destination: values.destination.id,
-      products: values.products.map((product) => ({
-        id: product.id,
-        quantity: product.quantity,
-        price: product.price,
-      })),
-    };
+    const data = transform(values);
     if (id > 0) {
       await resource.update(id, data);
     } else {
@@ -65,11 +68,10 @@ const DeliveryOrderForm = ({ id, data = {}, onFinish, onCancel }) => {
         initialValues={initialValues}
         onSubmit={handleSubmit}
       >
-        {({ values, errors, handleChange, setFieldValue, isSubmitting }) => (
+        {({ values, errors, setFieldValue, isSubmitting }) => (
           <Form>
-            <TextField
-              value={values.outboundNo}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="outboundNo"
               label="Out. No"
               size="small"
@@ -82,33 +84,17 @@ const DeliveryOrderForm = ({ id, data = {}, onFinish, onCancel }) => {
               readOnly={loading}
               disabled
             />
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="client"
+            <Field
               name="client"
-              value={values.client.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("client", nVal || {});
-              }}
-              inputValue={
-                values.client.name
-                  ? `${values.client.name} - ${values.client.description}`
-                  : ""
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.clients &&
-                data.clients.map(({ name, description, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.customers}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Client"
                   size="small"
@@ -119,89 +105,54 @@ const DeliveryOrderForm = ({ id, data = {}, onFinish, onCancel }) => {
                 />
               )}
             />
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="origin"
-              value={values.origin.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("origin", nVal || {});
-              }}
-              inputValue={
-                values.origin.name
-                  ? `${values.origin.name} - ${values.origin.description}`
-                  : ""
+            <Field
+              name="origin"
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.warehouses &&
-                data.warehouses.map(({ name, description, address, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                  address,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.warehouses}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Origin"
+                  helperText={values.origin.address || ""}
                   size="small"
                   required
                   fullWidth
                   name="origin"
                   margin="dense"
-                  helperText={(values.origin && values.origin.address) || ""}
                 />
               )}
             />
 
-            <Autocomplete
-              disablePortal
-              readOnly={loading}
-              fullWidth
-              id="destination"
-              value={values.destination.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("destination", nVal || {});
-              }}
-              inputValue={
-                values.destination.name
-                  ? `${values.destination.name} - ${values.destination.description}`
-                  : ""
+            <Field
+              name="destination"
+              component={Autocomplete}
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.customers &&
-                data.customers.map(({ name, description, address, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                  address,
-                }))
-              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              options={data.customers}
+              disabled={loading}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
-                  label="Destination"
+                  label="Customer"
+                  helperText={values.destination.address || ""}
                   size="small"
                   required
                   fullWidth
                   name="destination"
                   margin="dense"
-                  helperText={
-                    (values.destination && values.destination.address) || ""
-                  }
                 />
               )}
             />
 
-            <TextField
-              value={values.deliveryDate}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="deliveryDate"
               label="Delv. Date"
               size="small"

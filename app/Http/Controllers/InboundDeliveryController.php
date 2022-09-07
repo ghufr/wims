@@ -24,7 +24,7 @@ class InboundDeliveryController extends Controller
     $this->authorize('viewAll', InboundDelivery::class);
 
     return Inertia::render('Inbound/InboundDelivery/Index', [
-      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->get(),
+      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name', 'warehouse:id,name'])->orderBy('updated_at', 'desc')->get(),
       'warehouses' => Warehouse::all(['id', 'name', 'description']),
       'clients' => Vendor::where('type', 'C')->get(),
       'suppliers' => Vendor::where('type', 'S')->get(),
@@ -84,14 +84,7 @@ class InboundDeliveryController extends Controller
     $inboundDelivery->products()->attach($nProducts);
     $inboundDelivery->save();
 
-    return Inertia::render('Inbound/InboundDelivery/Index', [
-      'inbounds' => InboundDelivery::with(['client:id,name', 'supplier:id,name'])->get(),
-      'warehouses' => Warehouse::all(['id', 'name', 'description']),
-      'clients' => Vendor::where('type', 'C')->get(),
-      'suppliers' => Vendor::where('type', 'S')->get(),
-      'products' => Product::all(['id', 'name', 'description', 'baseUom']),
-      'inbound' => $inboundDelivery->toArray()
-    ]);
+    return Redirect::route('inbound.delivery.index');
   }
 
   public function show(InboundDelivery $delivery)

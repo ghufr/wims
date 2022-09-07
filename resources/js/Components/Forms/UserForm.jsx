@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
+import { TextField } from "formik-mui";
 import {
   Box,
   Button,
@@ -12,7 +13,6 @@ import {
   // InputLabel,
   // MenuItem,
   // Select,
-  TextField,
 } from "@mui/material";
 import { useState } from "react";
 import useResource from "@/Hooks/useResource";
@@ -42,6 +42,9 @@ const CustomerForm = ({ id, onFinish, onCancel }) => {
 
   const handleSubmit = async (values) => {
     if (id > 0) {
+      if (values.password.length == 0) {
+        delete values.password;
+      }
       await resource.update(id, values);
     } else {
       await resource.create(values);
@@ -58,13 +61,11 @@ const CustomerForm = ({ id, onFinish, onCancel }) => {
       >
         {({ values, errors, handleChange, isSubmitting }) => (
           <Form>
-            <TextField
-              value={values.name}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="name"
               label="Name"
               variant="standard"
-              error={errors.name}
               helperText={errors.name}
               autoFocus
               fullWidth
@@ -72,31 +73,26 @@ const CustomerForm = ({ id, onFinish, onCancel }) => {
               disabled={loading}
               required
             />
-            <TextField
-              value={values.email}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="email"
               label="Email"
               variant="standard"
-              error={errors.email}
               helperText={errors.email}
-              autoFocus
               fullWidth
               type="email"
               margin="normal"
               disabled={loading}
               required
             />
-            <TextField
-              value={values.password}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="password"
               label="Password"
+              type="password"
               // placeholder={id > 0 ? "(Unchanged)" : ""}
               variant="standard"
-              error={errors.password}
               helperText={errors.password}
-              autoFocus
               fullWidth
               margin="normal"
               disabled={loading}

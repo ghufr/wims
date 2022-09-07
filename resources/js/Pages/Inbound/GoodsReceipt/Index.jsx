@@ -20,6 +20,7 @@ const GoodsReceiptIndex = ({
   const [select, setSelect] = useState(-1);
   const [modal, setModal] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
+  console.log(receipts);
   const columns = [
     {
       headerName: "GR. No",
@@ -49,6 +50,12 @@ const GoodsReceiptIndex = ({
       minWidth: 100,
     },
     {
+      headerName: "Status",
+      field: "status",
+      // minWidth: 80,
+      // valueGetter: (params) => params.row.status,
+    },
+    {
       headerName: "Warehouse",
       field: "warehouse",
       flex: 1,
@@ -70,7 +77,7 @@ const GoodsReceiptIndex = ({
     // },
     {
       headerName: "Supplier",
-      field: "status",
+      field: "supplier",
       flex: 1,
       minWidth: 80,
       valueGetter: (params) => params.row.supplier.name,

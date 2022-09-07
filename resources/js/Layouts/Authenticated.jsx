@@ -8,6 +8,8 @@ import {
   HiOutlineArrowSmLeft,
   HiOutlineArchive,
   HiChevronUp,
+  HiLogout,
+  HiOutlineLogout,
 } from "react-icons/hi";
 import { Head, Link, usePage } from "@inertiajs/inertia-react";
 
@@ -24,8 +26,12 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Button,
+  IconButton,
 } from "@mui/material";
 import { useState } from "react";
+import Notification from "@/Components/Notification";
+import { Inertia } from "@inertiajs/inertia";
 
 const queryClient = new QueryClient();
 
@@ -79,7 +85,7 @@ const renderMenu = (menu, padding = 4) => {
 export default function Authenticated({ title = "", description, children }) {
   const { props } = usePage();
 
-  // const user = props.auth.user;
+  console.log(props);
 
   function can(permission) {
     return props.can[permission] != null;
@@ -175,6 +181,10 @@ export default function Authenticated({ title = "", description, children }) {
 
   const drawerWidth = 240;
 
+  const handleLogout = () => {
+    Inertia.post(route("logout"));
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppBar
@@ -185,10 +195,21 @@ export default function Authenticated({ title = "", description, children }) {
         }}
       >
         <Toolbar variant="dense">
-          <Typography variant="h6" noWrap component="div">
-            {title}
-          </Typography>
-          <p>{description || " "}</p>
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography variant="h6" noWrap component="div">
+              {title}
+            </Typography>
+            <p>{description || " "}</p>
+          </Box>
+          <IconButton variant="outlined" color="error" onClick={handleLogout}>
+            <HiOutlineLogout />
+          </IconButton>
         </Toolbar>
       </AppBar>
       <CssBaseline />
@@ -231,6 +252,7 @@ export default function Authenticated({ title = "", description, children }) {
           {children}
         </Box>
       </Box>
+      <Notification messages={props.errors} />
     </QueryClientProvider>
   );
 }
