@@ -96,11 +96,9 @@ const InboundIndex = ({
       inboundIds: selectedRows,
       grDate: e.target.grDate.value,
     };
-
-    await Inertia.post(route("inbound.receipt.from.inbound"), data).then(
-      (res) => res.data
-    );
     setModal("");
+
+    await Inertia.post(route("inbound.receipt.from.inbound"), data);
   };
 
   const { destroyMany } = useResource("inbound.delivery");

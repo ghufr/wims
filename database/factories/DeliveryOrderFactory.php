@@ -23,12 +23,13 @@ class DeliveryOrderFactory extends Factory
     $warehouse = Warehouse::inRandomOrder()->limit(1)->get()->first();
 
     $deliveryDate = fake()->dateTimeBetween('-1 week', '-1 day');
-    $reference = rand(0, 1) === 1 ? 'PICK-' . date_format($deliveryDate, 'Ymd') . fake()->numerify('##') : null;
+    // $reference = rand(0, 1) === 1 ? 'PICK-' . date_format($deliveryDate, 'Ymd') . fake()->numerify('##') : null;
 
     return [
       'doNo' => fake()->ean13(),
       'outboundNo' => $outbound->outboundNo,
-      'reference' => $reference,
+      // 'reference' => $reference,
+      'status' => fake()->randomElement(['OPEN', 'CLOSE', 'PROCESS']),
       'deliveryDate' => $deliveryDate,
       'client_id' => $outbound->client_id,
       'origin_id' => $warehouse->id,

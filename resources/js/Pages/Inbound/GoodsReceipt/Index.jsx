@@ -20,7 +20,6 @@ const GoodsReceiptIndex = ({
   const [select, setSelect] = useState(-1);
   const [modal, setModal] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
-  console.log(receipts);
   const columns = [
     {
       headerName: "GR. No",
@@ -138,7 +137,7 @@ const GoodsReceiptIndex = ({
           <Typography id="modal-title" variant="h6" component="h2">
             Putaway List
           </Typography>
-          <PutawayForm />
+          <PutawayForm data={{ goodsReceiptIds: selectedRows }} />
         </Box>
       </Modal>
 

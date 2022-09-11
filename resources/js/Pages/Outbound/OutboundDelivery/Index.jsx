@@ -2,10 +2,18 @@ import React, { useState } from "react";
 import Authenticated from "@/Layouts/Authenticated";
 // import Modal from "@/Components/Modal";
 
-import { ButtonGroup, Button, Box, Typography, Modal } from "@mui/material";
+import {
+  ButtonGroup,
+  Button,
+  Box,
+  Typography,
+  Modal,
+  TextField,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import OutboundDeliveryForm from "@/Components/Forms/OutboundDeliveryForm";
+import { Inertia } from "@inertiajs/inertia";
 
 const OutboundDeliveryIndex = ({
   outbounds,
@@ -16,6 +24,7 @@ const OutboundDeliveryIndex = ({
   can,
 }) => {
   const [select, setSelect] = useState(-1);
+  const [modal, setModal] = useState("");
   const [selectedRows, setSelectedRows] = useState([]);
   const columns = [
     {
@@ -88,6 +97,17 @@ const OutboundDeliveryIndex = ({
 
   const { destroyMany } = useResource("outbound.delivery");
 
+  const handleStoreMany = async (e) => {
+    e.preventDefault();
+    const data = {
+      outboundIds: selectedRows,
+      deliveryDate: e.target.deliveryDate.value,
+    };
+    setModal("");
+
+    await Inertia.post(route("outbound.order.from.outbound"), data);
+  };
+
   return (
     <div>
       <Modal
@@ -114,6 +134,36 @@ const OutboundDeliveryIndex = ({
           </Box>
         </Box>
       </Modal>
+      <Modal
+        open={modal === "deliveryOrder"}
+        onClose={() => {
+          setModal("");
+        }}
+      >
+        <Box sx={{ maxWidth: 400 }} className="modal-bg">
+          <Box component="form" onSubmit={handleStoreMany}>
+            <TextField
+              name="deliveryDate"
+              label="Delivery Date"
+              size="small"
+              // defaultValue={new Date().toISOString()}
+              autoFocus
+              fullWidth
+              margin="dense"
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              required
+            />
+            <Box textAlign="right" sx={{ mt: 2 }}>
+              <Button type="submit" variant="contained">
+                Submit
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
       <ButtonGroup
         variant="text"
         aria-label="outlined primary button group"
@@ -133,6 +183,16 @@ const OutboundDeliveryIndex = ({
             Delete ({selectedRows.length})
           </Button>
         )}
+        {can.create_DeliveryOrder && selectedRows.length > 0 && (
+          <Button
+            variant="outlined"
+            color="success"
+            size="small"
+            onClick={() => setModal("deliveryOrder")}
+          >
+            Delivery Order ({selectedRows.length})
+          </Button>
+        )}
       </ButtonGroup>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
@@ -140,6 +200,7 @@ const OutboundDeliveryIndex = ({
           columns={columns}
           rowsPerPageOptions={[25, 50, 100]}
           onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          isRowSelectable={(params) => params.row.status == "OPEN"}
           selectionModel={selectedRows}
           checkboxSelection
           density="compact"

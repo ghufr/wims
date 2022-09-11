@@ -30,8 +30,7 @@ import {
 } from "recharts";
 // import Table from "@/Components/Table";
 
-const Dashboard = ({ can, ...props }) => {
-  console.log(props);
+const Dashboard = ({ can, inOutQty, inventoryValues, ...props }) => {
   const rows = [
     {
       name: "Hello",
@@ -62,12 +61,12 @@ const Dashboard = ({ can, ...props }) => {
   ];
 
   const warehouses = [{ label: "Hello", value: "World" }];
-  const data = Array(7)
-    .fill(0)
-    .map((_, i) => ({
-      date: `${i + 1}-Jan-2022`,
-      quantity: 1000 * (i + 1),
-    }));
+  // const data = Array(7)
+  //   .fill(0)
+  //   .map((_, i) => ({
+  //     date: `${i + 1}-Jan-2022`,
+  //     quantity: 1000 * (i + 1),
+  //   }));
   return (
     <div>
       <Head title="Dashboard" />
@@ -194,10 +193,10 @@ const Dashboard = ({ can, ...props }) => {
               </Box>
 
               <ResponsiveContainer height={320}>
-                <BarChart data={data}>
+                <BarChart data={inventoryValues}>
                   <CartesianGrid />
                   <XAxis
-                    dataKey="date"
+                    dataKey="posting_date"
                     angle={-20}
                     dx={-18}
                     dy={8}
@@ -237,10 +236,10 @@ const Dashboard = ({ can, ...props }) => {
               </Box>
 
               <ResponsiveContainer height={320}>
-                <BarChart data={data}>
+                <BarChart data={inOutQty}>
                   <CartesianGrid />
                   <XAxis
-                    dataKey="date"
+                    dataKey="posting_date"
                     angle={-20}
                     dx={-18}
                     dy={8}
@@ -259,13 +258,13 @@ const Dashboard = ({ can, ...props }) => {
                   <Tooltip />
                   <Legend dy={24} wrapperStyle={{ fontSize: "11px" }} />
                   <Bar
-                    dataKey="quantity"
+                    dataKey="inbound"
                     fill="#2979ff"
                     name="Inbound"
                     label={false}
                   ></Bar>
                   <Bar
-                    dataKey="quantity"
+                    dataKey="outbound"
                     fill="#f50057"
                     name="Outbound"
                     label={false}
@@ -322,11 +321,6 @@ const Dashboard = ({ can, ...props }) => {
 };
 
 Dashboard.layout = (page) => {
-  const { props } = page;
-  return (
-    <Authenticated user={props.auth.user} title="Dashboard">
-      {page}
-    </Authenticated>
-  );
+  return <Authenticated title="Dashboard">{page}</Authenticated>;
 };
 export default Dashboard;

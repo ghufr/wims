@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
+use App\Models\OutboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\Warehouse;
@@ -137,5 +138,59 @@ class DeliveryOrderController extends Controller
     $ids = explode(',', $id);
     DeliveryOrder::whereIn('id', $ids)->delete();
     return Redirect::route('outbound.order.index');
+  }
+
+  public function fromOutbound(Request $request)
+  {
+    $this->authorize('create', DeliveryOrder::class);
+    $validated = $request->validate([
+      'deliveryDate' => 'required|date',
+      'outboundIds' => 'required|array',
+    ]);
+
+    $outbounds = OutboundDelivery::with(['products:id'])->whereIn('id', $validated['outboundIds'])->get();
+    $count = DeliveryOrder::where('deliveryDate', '=', $validated['deliveryDate'])->count();
+
+
+    $index = 0;
+    foreach ($outbounds as $outbound) {
+      $deliveryOrder = new DeliveryOrder([
+        'outboundNo' => $outbound->outboundNo,
+        'deliveryDate' => $validated['deliveryDate'],
+      ]);
+
+      $deliveryOrder->doNo = Utils::generateIncrementNo($validated['deliveryDate'], $count + $index, 1);
+      $deliveryOrder->client()->associate($outbound->client);
+      $deliveryOrder->origin()->associate($outbound->origin);
+      $deliveryOrder->destination()->associate($outbound->destination);
+
+      $deliveryOrder->save();
+
+      $products = $outbound->products->map->pivot;
+      $nProducts = $products->keyBy('product_id');
+      $nProducts->transform(function ($item, $key) {
+        return $item->only(['name', 'description', 'baseUom', 'price', 'quantity', 'amount']);
+      });
+
+      $deliveryOrder->products()->attach($nProducts->toArray());
+      $deliveryOrder->save();
+
+
+      $outbound->status = 'CLOSE';
+      $outbound->save();
+
+      $index++;
+    }
+
+    return Redirect::route('outbound.order.index');
+  }
+  public function getPickingList()
+  {
+    // TODO
+  }
+  public function toPicking()
+  {
+    $this->authorize('create', DeliveryOrder::class);
+    //
   }
 }

@@ -17,7 +17,7 @@ class InventorySeeder extends Seeder
    */
   public function run()
   {
-    $receipts = GoodsReceipt::whereNotNull('reference')->with('products:id')->get();
+    $receipts = GoodsReceipt::where('status', '=', 'CLOSE')->with('products:id')->get();
 
     foreach ($receipts as $receipt) {
       $products = $receipt->products;

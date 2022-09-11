@@ -15,8 +15,10 @@ const DeliveryOrderIndex = ({
   products,
   can,
 }) => {
+  const [modal, setModal] = useState("");
   const [select, setSelect] = useState(-1);
   const [selectedRows, setSelectedRows] = useState([]);
+
   const columns = [
     {
       headerName: "Inb. No",
@@ -71,12 +73,12 @@ const DeliveryOrderIndex = ({
       field: "destination.address",
       valueGetter: (params) => params.row.destination.address,
     },
-    // {
-    //   headerName: "Status",
-    //   field: "status",
-    //   flex: 1,
-    //   minWidth: 80,
-    // },
+    {
+      headerName: "Status",
+      field: "status",
+      flex: 1,
+      minWidth: 80,
+    },
     {
       headerName: "Updated At",
       field: "updated_at",
@@ -132,6 +134,16 @@ const DeliveryOrderIndex = ({
             Delete ({selectedRows.length})
           </Button>
         )}
+        {can.create_DeliveryOrder && selectedRows.length > 0 && (
+          <Button
+            variant="outlined"
+            color="success"
+            size="small"
+            onClick={() => setModal("picking")}
+          >
+            Picking ({selectedRows.length})
+          </Button>
+        )}
       </ButtonGroup>
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
@@ -139,6 +151,7 @@ const DeliveryOrderIndex = ({
           columns={columns}
           rowsPerPageOptions={[25, 50, 100]}
           onSelectionModelChange={(rows) => setSelectedRows(rows)}
+          isRowSelectable={(params) => params.row.status == "OPEN"}
           selectionModel={selectedRows}
           checkboxSelection
           density="compact"

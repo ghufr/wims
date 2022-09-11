@@ -19,16 +19,16 @@ class InboundSeeder extends Seeder
    */
   public function run()
   {
-    $inbounds = InboundDelivery::factory(10)->create();
-    $receipts = GoodsReceipt::factory(10)->create();
+    $inbounds = InboundDelivery::factory(100)->create();
+    $receipts = GoodsReceipt::factory(100)->create();
 
     foreach ($inbounds as $key => $inbound) {
       $products = Product::inRandomOrder()->limit(rand(2, 4))->get();
       $receipt = $receipts->get($key);
 
       foreach ($products as $product) {
-        $quantity = rand(100, 1000);
-        $price = rand(21000, 75000);
+        $quantity = rand(1, 9) * 20;
+        $price = rand(20, 50) * 1000;
         $amount = $price * $quantity;
         $nProduct = ['price' => $price, 'quantity' => $quantity, 'amount' => $amount, ...$product->only(['name', 'description', 'baseUom'])];
 

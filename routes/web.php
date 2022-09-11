@@ -31,6 +31,9 @@ Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'web
 
 Route::prefix('inbound')->name('inbound.')->middleware(['auth', 'web'])->group(function () {
   Route::post('receipt/form-inbound', [GoodsReceiptController::class, 'fromInbound'])->name('receipt.from.inbound');
+  Route::post('receipt/to-putaway', [GoodsReceiptController::class, 'toPutaway'])->name('receipt.to.putaway');
+  Route::post('receipt/get-putaway', [GoodsReceiptController::class, 'getPutawayList'])->name('receipt.get.putaway');
+
   Route::resources(
     [
       'delivery' => InboundDeliveryController::class,
@@ -41,6 +44,8 @@ Route::prefix('inbound')->name('inbound.')->middleware(['auth', 'web'])->group(f
 });
 
 Route::prefix('outbound')->name('outbound.')->middleware(['auth', 'web'])->group(function () {
+  Route::post('order/form-outbound', [DeliveryOrderController::class, 'fromOutbound'])->name('order.from.outbound');
+
   Route::resources(
     [
       'delivery' => OutboundDeliveryController::class,

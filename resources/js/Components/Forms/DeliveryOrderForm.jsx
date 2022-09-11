@@ -165,7 +165,7 @@ const DeliveryOrderForm = ({ id, data = {}, onFinish, onCancel }) => {
               InputLabelProps={{
                 shrink: true,
               }}
-              readOnly={loading}
+              disabled={loading}
               required
             />
 

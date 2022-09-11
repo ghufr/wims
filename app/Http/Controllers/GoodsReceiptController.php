@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GoodsReceipt;
 use App\Models\InboundDelivery;
+use App\Models\Location;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\Warehouse;
@@ -121,15 +122,6 @@ class GoodsReceiptController extends Controller
         return $item->only(['name', 'description', 'baseUom', 'price', 'quantity', 'amount']);
       });
 
-      // dd($nProducts);
-
-
-
-
-      // $nProducts = $products->keyBy('product_id');
-      // $products = Product::whereIn('id', $nProducts->keys())->get();
-
-
       $goodsReceipt->products()->attach($nProducts->toArray());
       $goodsReceipt->save();
 
@@ -162,6 +154,30 @@ class GoodsReceiptController extends Controller
   public function update(Request $request, GoodsReceipt $receipt)
   {
     $this->authorize('update', $receipt);
+
+    $validated = $request->validate([
+      'client' => 'required|exists:vendors,id',
+      'warehouse' => 'required|exists:warehouses,id',
+      'supplier' => 'required|exists:vendors,id',
+      'inboundNo' => 'sometimes|exists:inbound_deliveries,inboundNo',
+      'grDate' => 'required',
+      'products' => 'required|array',
+    ]);
+
+    $receipt->client()->associate($validated['client']);
+    $receipt->supplier()->associate($validated['supplier']);
+    $receipt->warehouse()->associate($validated['warehouse']);
+
+    $receipt->save();
+
+    $nProducts = $request->collect('products')->keyBy('id');
+    $products = Product::whereIn('id', $nProducts->keys())->get();
+    $nProducts = ProductService::transform($nProducts, $products);
+
+    $receipt->products()->sync($nProducts);
+    $receipt->save();
+
+    return Redirect::route('inbound.receipt.index');
   }
 
   /**
@@ -177,5 +193,33 @@ class GoodsReceiptController extends Controller
     $ids = explode(',', $id);
     GoodsReceipt::whereIn('id', $ids)->delete();
     return Redirect::route('inbound.receipt.index');
+  }
+
+  public function getPutawayList(Request $request)
+  {
+    $validated = $request->validate([
+      'goodsReceiptIds' => 'required|array'
+    ]);
+
+
+    $goodsReceipts = GoodsReceipt::with(['products', 'warehouse:id,name,description', 'client:id,name'])->whereIn('id', $validated['goodsReceiptIds'])->get();
+    $goodsReceiptsByWarehouse = $goodsReceipts->groupBy('warehouse_id');
+
+    // Get all location
+    $locations = Location::whereIn('warehouse_id', $goodsReceiptsByWarehouse->keys())->get()->groupBy('warehouse_id');
+
+
+    // dd($goodsReceiptsByWarehouse->toArray());
+
+    return response()->json(['goodsReceiptsByWarehouse' => $goodsReceiptsByWarehouse, 'locations' => $locations]);
+  }
+
+  public function toPutaway(Request $request)
+  {
+    $this->authorize('create', GoodsReceipt::class);
+
+    $validated = $request->validate([
+      'inventories' => 'required|array'
+    ]);
   }
 }

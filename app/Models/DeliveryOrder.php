@@ -11,7 +11,7 @@ class DeliveryOrder extends Model
 
   protected $fillable = [
     'doNo',
-    'outNo',
+    'outboundNo',
     'deliveryDate',
     'reference',
     'status'

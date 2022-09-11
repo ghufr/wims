@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\DeliveryOrder;
 use App\Models\OutboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;

@@ -24,17 +24,17 @@ class GoodsReceiptFactory extends Factory
     $warehouse = Warehouse::inRandomOrder()->limit(1)->get()->first();
 
     $grDate = fake()->dateTimeBetween('-1 week', '-1 day');
-    $reference = rand(0, 1) === 1 ? 'PUTAWAY-' . date_format($grDate, 'Ymd') . fake()->numerify('##') : null;
+    // $reference = rand(0, 1) === 1 ? 'PUTAWAY-' . date_format($grDate, 'Ymd') . fake()->numerify('##') : null;
 
     return [
       'grNo' => fake()->ean13(),
       'inboundNo' => $inbound->inboundNo,
-      'reference' => $reference,
+      // 'reference' => $reference,
       'grDate' => $grDate,
       'client_id' => $inbound->client,
       'supplier_id' => $inbound->supplier,
       'warehouse_id' => $warehouse,
-      'status' => $reference != null ? 'CLOSE' : 'OPEN'
+      'status' => fake()->randomElement(['OPEN', 'CLOSE', 'PROCESS'])
     ];
   }
 }
