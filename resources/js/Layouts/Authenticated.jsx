@@ -207,6 +207,9 @@ export default function Authenticated({ title = "", description, children }) {
             </Typography>
             <p>{description || " "}</p>
           </Box>
+          <Typography variant="body1" component="div">
+            {props.auth.user.name}
+          </Typography>
           <IconButton variant="outlined" color="error" onClick={handleLogout}>
             <HiOutlineLogout />
           </IconButton>

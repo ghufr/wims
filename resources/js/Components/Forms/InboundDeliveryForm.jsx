@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 
-import { Formik, Form } from "formik";
+import { Formik, Form, Field } from "formik";
 import {
   Box,
   Button,
-  Autocomplete,
-  TextField,
   Typography,
+  TextField as MuiTextField,
 } from "@mui/material";
 import { useState } from "react";
 import useResource from "@/Hooks/useResource";
+import { Autocomplete, TextField } from "formik-mui";
 import ProductListForm from "./Shared/ProductListForm";
 
 const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
@@ -44,7 +44,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
     supplier: values.supplier.id,
     warehouse: values.warehouse.id,
     products: values.products.map((product) => ({
-      id: product.id,
+      id: product.id || product.product_id,
       quantity: product.quantity,
       price: product.price,
     })),
@@ -52,6 +52,7 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
 
   const handleSubmit = async (values) => {
     const data = transform(values);
+    console.log(data);
     if (id > 0) {
       await resource.update(id, data);
     } else {
@@ -67,11 +68,10 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
         initialValues={initialValues}
         onSubmit={handleSubmit}
       >
-        {({ values, errors, handleChange, setFieldValue, isSubmitting }) => (
+        {({ values, errors, setFieldValue, isSubmitting }) => (
           <Form>
-            <TextField
-              value={values.inboundNo}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="inboundNo"
               label="Inb. No"
               size="small"
@@ -83,69 +83,40 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
               type="text"
               disabled
             />
-            <Autocomplete
+            <Field
+              component={Autocomplete}
               disablePortal
               disabled={loading}
               fullWidth
               id="client"
               name="client"
-              value={values.client.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("client", nVal || {});
-              }}
-              inputValue={
-                values.client.name
-                  ? `${values.client.name} - ${values.client.description}`
-                  : ""
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.clients &&
-                data.clients.map(({ name, description, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                }))
-              }
+              options={data.clients}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Client"
                   size="small"
                   required
                   fullWidth
-                  name="client"
                   margin="dense"
                 />
               )}
             />
-            <Autocomplete
+            <Field
+              component={Autocomplete}
               disablePortal
               disabled={loading}
               fullWidth
-              id="warehouse"
-              value={values.warehouse.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("warehouse", nVal || {});
-              }}
-              inputValue={
-                values.warehouse.name
-                  ? `${values.warehouse.name} - ${values.warehouse.description}`
-                  : ""
+              name="warehouse"
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.warehouses &&
-                data.warehouses.map(({ name, description, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                }))
-              }
+              options={data.warehouses}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Warehouse"
                   size="small"
@@ -157,32 +128,18 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
               )}
             />
 
-            <Autocomplete
+            <Field
+              component={Autocomplete}
               disablePortal
               disabled={loading}
               fullWidth
-              id="supplier"
-              value={values.supplier.name || ""}
-              onChange={(e, nVal) => {
-                setFieldValue("supplier", nVal || {});
-              }}
-              inputValue={
-                values.supplier.name
-                  ? `${values.supplier.name} - ${values.supplier.description}`
-                  : ""
+              name="supplier"
+              getOptionLabel={(option) =>
+                option.name ? `${option.name} - ${option.description}` : ""
               }
-              options={
-                data.suppliers &&
-                data.suppliers.map(({ name, description, id }) => ({
-                  label: `${name} - ${description}`,
-                  value: name,
-                  id,
-                  name,
-                  description,
-                }))
-              }
+              options={data.suppliers}
               renderInput={(params) => (
-                <TextField
+                <MuiTextField
                   {...params}
                   label="Supplier"
                   size="small"
@@ -194,9 +151,8 @@ const InboundDeliveryForm = ({ id, data = {}, onFinish, onCancel }) => {
               )}
             />
 
-            <TextField
-              value={values.deliveryDate}
-              onChange={handleChange}
+            <Field
+              component={TextField}
               name="deliveryDate"
               label="Delv. Date"
               size="small"

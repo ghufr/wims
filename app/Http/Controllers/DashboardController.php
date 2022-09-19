@@ -20,7 +20,7 @@ class DashboardController extends Controller
     // $inbound
     // TODO: diff date
 
-    $now = Carbon::today()->toDateString();
+    $now = Carbon::now()->add(2, 'day')->toDateString();
     $before = Carbon::now()->sub(7, 'day')->toDateString();
 
     // $stockAging = Inventory::whereBetween('');
@@ -72,8 +72,8 @@ class DashboardController extends Controller
 
 
 
-    for ($i = 6; $i >= 0; $i--) {
-      $dt = Carbon::now()->sub($i, 'day')->toDateString();
+    for ($i = 6; $i > 0; $i--) {
+      $dt = Carbon::today()->add(2, 'day')->sub($i, 'day')->toDateString();
       $inboundQty = 0;
       $outboundQty = 0;
       $net = 0;

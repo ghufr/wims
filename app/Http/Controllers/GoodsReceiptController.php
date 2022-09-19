@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GoodsReceipt;
 use App\Models\InboundDelivery;
+use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Vendor;
@@ -77,12 +78,9 @@ class GoodsReceiptController extends Controller
 
     $goodsReceipt->save();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    ProductService::attachProducts($nProducts, $goodsReceipt);
 
-
-    $goodsReceipt->products()->attach($nProducts);
     $goodsReceipt->save();
 
     return Redirect::route('inbound.receipt.index');
@@ -168,13 +166,13 @@ class GoodsReceiptController extends Controller
     $receipt->supplier()->associate($validated['supplier']);
     $receipt->warehouse()->associate($validated['warehouse']);
 
-    $receipt->save();
+    // $receipt->save();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    $receipt->products()->detach();
+    ProductService::attachProducts($nProducts, $receipt);
 
-    $receipt->products()->sync($nProducts);
+    // $receipt->products()->sync($nProducts);
     $receipt->save();
 
     return Redirect::route('inbound.receipt.index');
@@ -201,17 +199,30 @@ class GoodsReceiptController extends Controller
       'goodsReceiptIds' => 'required|array'
     ]);
 
-
     $goodsReceipts = GoodsReceipt::with(['products', 'warehouse:id,name,description', 'client:id,name'])->whereIn('id', $validated['goodsReceiptIds'])->get();
-    $goodsReceiptsByWarehouse = $goodsReceipts->groupBy('warehouse_id');
+    $result = collect([]);
+    foreach ($goodsReceipts as $goodsReceipt) {
+      $products = $goodsReceipt->products;
+      $productIds = $products->pluck('id');
+      $inventories = Inventory::with(['location:id,name'])->whereIn('product_id', $productIds)
+        ->where('client_id', $goodsReceipt->client_id)
+        ->where('warehouse_id', $goodsReceipt->warehouse_id)
+        ->get();
+      $newLocations = Location::where('warehouse_id', $goodsReceipt->warehouse_id)->get();
+      $products = $products->map(function ($product) use ($inventories, $newLocations) {
+        $locations = $inventories->where('product_id', $product->id)->all();
+        $existingLocationIds = collect($locations)->pluck('location.id');
 
-    // Get all location
-    $locations = Location::whereIn('warehouse_id', $goodsReceiptsByWarehouse->keys())->get()->groupBy('warehouse_id');
+        $matchLocations = $newLocations->whereNotIn('id', $existingLocationIds)->where('section', $product->section)->all();
+        $locations = collect($locations)->values()->merge($matchLocations);
+        return collect($product)->merge(['locations' => $locations]);
+      });
+
+      $result->push(collect($goodsReceipt)->merge(['products' => $products->toArray()]));
+    }
 
 
-    // dd($goodsReceiptsByWarehouse->toArray());
-
-    return response()->json(['goodsReceiptsByWarehouse' => $goodsReceiptsByWarehouse, 'locations' => $locations]);
+    return response()->json(['goodsReceipts' => $result, 'goodsReceiptsByWarehouse' => $result->groupBy('warehouse_id'), 'locations' => []]);
   }
 
   public function toPutaway(Request $request)
@@ -219,7 +230,53 @@ class GoodsReceiptController extends Controller
     $this->authorize('create', GoodsReceipt::class);
 
     $validated = $request->validate([
-      'inventories' => 'required|array'
+      'inventories' => 'required|array',
+      'goodsReceiptIds' => 'required|array',
     ]);
+
+    $inventories = $request->collect('inventories');
+
+    $goodsReceipts = GoodsReceipt::with(['products', 'warehouse:id,name,description', 'client:id,name'])->whereIn('id', $validated['goodsReceiptIds'])->get();
+
+    foreach ($goodsReceipts as $goodsReceipt) {
+      $products = $goodsReceipt->products;
+      // $productIds = $products->pluck('id');
+
+      foreach ($products as $product) {
+        $location = $inventories->where('goodsReceipt', $goodsReceipt->id)->first();
+        // dd($goodsReceipt->id);
+        // if (!$location) continue;
+        $inventory = [
+          'product_id' => $product->id,
+          'warehouse_id' => $goodsReceipt->warehouse->id,
+          'location_id' => $location['location'],
+          'client_id' => $goodsReceipt->client->id
+        ];
+
+        $existingInventory = Inventory::where($inventory)->first();
+
+        if (is_null($existingInventory)) {
+          Inventory::create([
+            ...$inventory,
+            'quantity' => $product->pivot->quantity,
+            'avgPrice' => $product->pivot->price,
+            'baseUom' => $product->pivot->baseUom
+          ]);
+        } else {
+          // dd($existingInventory);
+          $nQuantity = $existingInventory->quantity + $product->pivot->quantity;
+          $oldAmount = $existingInventory->quantity * $existingInventory->avgPrice;
+          $nAmount = $product->pivot->amount;
+          $nAvgPrice = ($nAmount + $oldAmount) / $nQuantity;
+
+          $existingInventory->update([
+            'quantity' => $nQuantity,
+            'avgPrice' => $nAvgPrice,
+          ]);
+        }
+      }
+      $goodsReceipt->update(['status' => 'CLOSE']);
+    }
+    return Redirect::route('inbound.receipt.index');
   }
 }

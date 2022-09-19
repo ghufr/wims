@@ -13,7 +13,6 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import InboundDeliveryForm from "@/Components/Forms/InboundDeliveryForm";
-import axios from "axios";
 import { Inertia } from "@inertiajs/inertia";
 
 const InboundIndex = ({
@@ -97,6 +96,7 @@ const InboundIndex = ({
       grDate: e.target.grDate.value,
     };
     setModal("");
+    setSelectedRows([]);
 
     await Inertia.post(route("inbound.receipt.from.inbound"), data);
   };
@@ -129,12 +129,7 @@ const InboundIndex = ({
           </Box>
         </Box>
       </Modal>
-      <Modal
-        open={modal === "goodsReceipt"}
-        onClose={() => {
-          setModal("");
-        }}
-      >
+      <Modal open={modal === "goodsReceipt"} onClose={() => setModal("")}>
         <Box sx={{ maxWidth: 400 }} className="modal-bg">
           <Box component="form" onSubmit={handleStoreMany}>
             <TextField

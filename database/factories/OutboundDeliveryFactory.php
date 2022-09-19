@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Customer;
+use App\Models\Vendor;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,14 +20,16 @@ class OutboundDeliveryFactory extends Factory
   public function definition()
   {
     $origin = Warehouse::inRandomOrder()->limit(1)->get()->first();
-    $clients = Customer::inRandomOrder()->limit(2)->get();
+    $clients = Vendor::where('type', 'C')->inRandomOrder()->limit(1)->get();
+    $customer = Customer::inRandomOrder()->limit(1)->get();
+
 
     return [
-      'outboundNo' => fake()->ean13(),
+      'outboundNo' => fake()->ean8(),
       'status' => fake()->randomElement(['OPEN', 'CLOSE', 'PROCESS']),
       'deliveryDate' => fake()->dateTimeBetween('-1 week', '- 1 day'),
       'origin_id' => $origin,
-      'dest_id' => $clients->last(),
+      'dest_id' => $customer->first(),
       'client_id' => $clients->first()
     ];
   }

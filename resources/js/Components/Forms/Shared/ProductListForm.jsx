@@ -1,15 +1,15 @@
 import {
-  Autocomplete,
   Box,
   Button,
   InputAdornment,
-  TextField,
+  TextField as MuiTextField,
   Typography,
 } from "@mui/material";
-import { FieldArray } from "formik";
+import { Field, FieldArray } from "formik";
+import { TextField, Autocomplete } from "formik-mui";
 import React from "react";
 
-const ProductListForm = ({ values, data, setFieldValue, loading }) => {
+const ProductListForm = ({ values, data, loading }) => {
   return (
     <FieldArray name="products">
       {({ remove, push }) => (
@@ -42,47 +42,45 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                     disabled={loading}
                     required
                   /> */}
-                    <Autocomplete
+                    <Field
+                      component={Autocomplete}
                       disablePortal
                       disabled={loading}
                       fullWidth
                       size="small"
-                      id="product"
-                      name={`products.${index}`}
-                      value={product.name || ""}
-                      isOptionEqualToValue={(option, val) => option.name == val}
-                      onChange={(e, nVal) => {
-                        if (nVal) {
-                          setFieldValue(`products.${index}`, nVal);
-                          // insert(index, nVal);
-                          // setFieldValue()
-                        } else {
-                          setFieldValue(`products.${index}`, {});
-                          remove(index);
-                        }
-                      }}
-                      inputValue={
-                        product.name
-                          ? `${product.name} - ${product.description}`
+                      name={`products[${index}]`}
+                      getOptionLabel={(option) =>
+                        option.name
+                          ? `${option.name} - ${option.description}`
                           : ""
                       }
-                      options={
-                        data.products &&
-                        data.products.map(
-                          ({ name, description, baseUom, id }) => ({
-                            label: `${name} - ${description}`,
-                            value: name,
-                            id,
-                            name,
-                            description,
-                            baseUom,
-                          })
-                        )
+                      isOptionEqualToValue={(option, val) =>
+                        option.name == val.name
                       }
+                      componentsProps={{
+                        clearIndicator: {
+                          onClick: () => remove(index),
+                        },
+                      }}
+                      // onChange={(e, nVal) => {
+                      //   if (nVal) {
+                      //     setFieldValue(`products[${index}]`, nVal);
+                      //   } else {
+                      //     setFieldValue(`products[${index}]`, {});
+                      //     remove(index);
+                      //   }
+                      // }}
+                      // inputValue={
+                      //   product.name
+                      //     ? `${product.name} - ${product.description}`
+                      //     : ""
+                      // }
+                      options={data.products}
                       renderInput={(params) => (
-                        <TextField
+                        <MuiTextField
                           {...params}
                           // variant="standard"
+                          name={`products[${index}].id`}
                           required
                           fullWidth
                           margin="none"
@@ -93,16 +91,10 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                   </td>
 
                   <td>
-                    <TextField
-                      name={`products.${index}.quantity`}
+                    <Field
+                      component={TextField}
+                      name={`products[${index}].quantity`}
                       type="number"
-                      value={product.quantity || ""}
-                      onChange={(e) =>
-                        setFieldValue(
-                          `products.${index}.quantity`,
-                          parseInt(e.target.value, 10)
-                        )
-                      }
                       fullWidth
                       margin="none"
                       size="small"
@@ -115,26 +107,26 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                           </InputAdornment>
                         ),
                       }}
-                    ></TextField>
+                    ></Field>
                   </td>
                   <td>
-                    <TextField
-                      name={`products.${index}.price`}
+                    <Field
+                      component={TextField}
+                      name={`products[${index}].price`}
                       type="number"
-                      value={product.price || ""}
-                      onChange={(e) =>
-                        setFieldValue(
-                          `products.${index}.price`,
-                          parseInt(e.target.value, 10)
-                        )
-                      }
+                      // onChange={(e) =>
+                      //   setFieldValue(
+                      //     `products.${index}.price`,
+                      //     parseInt(e.target.value, 10)
+                      //   )
+                      // }
                       // variant="standard"
                       fullWidth
                       margin="none"
                       size="small"
                       disabled={loading}
                       required
-                    ></TextField>
+                    ></Field>
                   </td>
                 </Box>
               ))}
@@ -145,9 +137,7 @@ const ProductListForm = ({ values, data, setFieldValue, loading }) => {
                 <Button
                   fullWidth
                   variant="outlined"
-                  onClick={() =>
-                    push({ name: "", description: "", quantity: "" })
-                  }
+                  onClick={() => push({ id: "", quantity: "", price: "" })}
                   disabled={loading}
                 >
                   Add

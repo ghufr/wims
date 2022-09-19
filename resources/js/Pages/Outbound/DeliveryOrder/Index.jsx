@@ -6,6 +6,7 @@ import { ButtonGroup, Button, Box, Typography, Modal } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import useResource from "@/Hooks/useResource";
 import DeliveryOrderForm from "@/Components/Forms/DeliveryOrderForm";
+import PickingForm from "@/Components/Forms/PickingForm";
 
 const DeliveryOrderIndex = ({
   orders,
@@ -21,7 +22,7 @@ const DeliveryOrderIndex = ({
 
   const columns = [
     {
-      headerName: "Inb. No",
+      headerName: "DO. No",
       field: "doNo",
       flex: 1,
       minWidth: 100,
@@ -111,6 +112,22 @@ const DeliveryOrderIndex = ({
               onFinish={() => setSelect(-1)}
               onCancel={() => setSelect(-1)}
               data={{ warehouses, clients, customers, products }}
+            />
+          </Box>
+        </Box>
+      </Modal>
+      <Modal open={modal === "picking"} onClose={() => setModal("")}>
+        <Box sx={{ maxWidth: 700 }} className="modal-bg">
+          <Typography id="modal-title" variant="h6" component="h2">
+            Picking List
+          </Typography>
+          <Box textAlign="right" sx={{ mt: 2 }}>
+            <PickingForm
+              data={{ deliveryOrderIds: selectedRows }}
+              onFinish={() => {
+                setModal("");
+                setSelectedRows([]);
+              }}
             />
           </Box>
         </Box>

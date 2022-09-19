@@ -61,6 +61,13 @@ const InventoryListIndex = ({ inventories }) => {
       valueGetter: (params) => params.row.baseUom,
     },
     {
+      headerName: "Avg. Price",
+      field: "avgPrice",
+      flex: 1,
+      maxWidth: 100,
+      // valueGetter: (params) => `${params.row.quantity}`,
+    },
+    {
       headerName: "Updated At",
       field: "updated_at",
       valueGetter: (params) =>

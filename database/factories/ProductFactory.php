@@ -24,7 +24,7 @@ class ProductFactory extends Factory
       'name' => strtoupper(fake()->numerify($category . '-' . $size . '-##')),
       'description' => fake()->sentence(1),
       'section' => fake()->randomElement(['FAST', 'SLOW']),
-      'baseEan' => fake()->ean13(),
+      'baseEan' => fake()->ean8(),
       'baseUom' => fake()->randomElement(['Kg']),
       'category' => $category,
       'type' => fake()->randomElement(['Frozen', 'Fresh']),

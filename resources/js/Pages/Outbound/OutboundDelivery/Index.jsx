@@ -104,6 +104,7 @@ const OutboundDeliveryIndex = ({
       deliveryDate: e.target.deliveryDate.value,
     };
     setModal("");
+    setSelectedRows([]);
 
     await Inertia.post(route("outbound.order.from.outbound"), data);
   };

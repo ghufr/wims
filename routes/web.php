@@ -45,6 +45,8 @@ Route::prefix('inbound')->name('inbound.')->middleware(['auth', 'web'])->group(f
 
 Route::prefix('outbound')->name('outbound.')->middleware(['auth', 'web'])->group(function () {
   Route::post('order/form-outbound', [DeliveryOrderController::class, 'fromOutbound'])->name('order.from.outbound');
+  Route::post('order/get-picking', [DeliveryOrderController::class, 'getPickingList'])->name('order.get.picking');
+  Route::post('order/to-picking', [DeliveryOrderController::class, 'toPicking'])->name('order.to.picking');
 
   Route::resources(
     [

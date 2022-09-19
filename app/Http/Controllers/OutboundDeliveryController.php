@@ -74,11 +74,10 @@ class OutboundDeliveryController extends Controller
     $outboundDelivery->destination()->associate($validated['destination']);
     $outboundDelivery->save();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    ProductService::attachProducts($nProducts, $outboundDelivery);
 
-    $outboundDelivery->products()->attach($nProducts);
+    // $outboundDelivery->products()->attach($nProducts);
     $outboundDelivery->save();
 
     return Redirect::route('outbound.delivery.index');
@@ -118,12 +117,11 @@ class OutboundDeliveryController extends Controller
     $delivery->destination()->associate($validated['destination']);
     // $delivery->update();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    $delivery->products()->detach();
+    ProductService::attachProducts($nProducts, $delivery);
 
-
-    $delivery->products()->sync($nProducts);
+    // $delivery->products()->sync($nProducts);
     $delivery->save();
 
     return Redirect::route('outbound.delivery.index');

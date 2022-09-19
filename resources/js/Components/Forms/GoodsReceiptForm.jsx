@@ -20,7 +20,7 @@ const GoodsReceiptForm = ({ id, data = {}, onFinish, onCancel }) => {
     grDate: "",
     client: "",
     supplier: "",
-    products: [{ name: "", description: "" }],
+    products: [],
     warehouse: "",
   });
 
@@ -46,11 +46,12 @@ const GoodsReceiptForm = ({ id, data = {}, onFinish, onCancel }) => {
       supplier: values.supplier.id,
       warehouse: values.warehouse.id,
       products: values.products.map((product) => ({
-        id: product.id,
+        id: product.id || product.product_id,
         quantity: product.quantity,
         price: product.price,
       })),
     };
+
     if (id > 0) {
       await resource.update(id, data);
     } else {
@@ -81,6 +82,7 @@ const GoodsReceiptForm = ({ id, data = {}, onFinish, onCancel }) => {
               margin="dense"
               type="text"
               readOnly={loading}
+              disabled
             />
             <Autocomplete
               disablePortal

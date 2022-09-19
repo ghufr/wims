@@ -27,7 +27,7 @@ class GoodsReceiptFactory extends Factory
     // $reference = rand(0, 1) === 1 ? 'PUTAWAY-' . date_format($grDate, 'Ymd') . fake()->numerify('##') : null;
 
     return [
-      'grNo' => fake()->ean13(),
+      'grNo' => fake()->ean8(),
       'inboundNo' => $inbound->inboundNo,
       // 'reference' => $reference,
       'grDate' => $grDate,

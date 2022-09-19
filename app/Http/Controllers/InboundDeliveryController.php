@@ -77,11 +77,8 @@ class InboundDeliveryController extends Controller
 
     $inboundDelivery->save();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
-
-    $inboundDelivery->products()->attach($nProducts);
+    $nProducts = $request->collect('products');
+    ProductService::attachProducts($nProducts, $inboundDelivery);
     $inboundDelivery->save();
 
     return Redirect::route('inbound.delivery.index');
@@ -102,25 +99,28 @@ class InboundDeliveryController extends Controller
     ]);
   }
 
-  public function update(Request $request, InboundDelivery $inbound)
+  public function update(Request $request, InboundDelivery $delivery)
   {
-    $this->authorize('update', $inbound);
+    $this->authorize('update', $delivery);
 
     $validated = $request->validate([
-      'client' => 'sometimes|exists:vendors,name',
-      'supplier' => 'required|exists:vendors,name',
-      'deliveryDate' => 'required',
+      'client' => 'required|exists:vendors,id',
+      'warehouse' => 'required|exists:warehouses,id',
+      'supplier' => 'required|exists:vendors,id',
+      'deliveryDate' => 'required|date',
+      'products' => 'required|array',
     ]);
 
-    $client = Vendor::where('name', $validated['client'])->first();
-    $supplier = Vendor::where('name', $validated['supplier'])->first();
 
-    if ($client) {
-      $inbound->client()->associate($client);
-    }
-    $inbound->supplier()->associate($supplier);
+    $delivery->client()->associate($validated['client']);
+    $delivery->supplier()->associate($validated['supplier']);
+    $delivery->warehouse()->associate($validated['warehouse']);
 
-    $inbound->update($validated);
+    $nProducts = $request->collect('products');
+    $delivery->products()->detach();
+    ProductService::attachProducts($nProducts, $delivery);
+
+    $delivery->save();
 
     return Redirect::route('inbound.delivery.index');
   }

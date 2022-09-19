@@ -19,7 +19,7 @@ class DeliveryOrder extends Model
 
   public function client()
   {
-    return $this->belongsTo(Warehouse::class);
+    return $this->belongsTo(Vendor::class, 'client_id', 'id');
   }
 
   public function origin()

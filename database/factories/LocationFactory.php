@@ -16,9 +16,10 @@ class LocationFactory extends Factory
    */
   public function definition()
   {
+    $locationType = fake()->randomElement(['BULK', 'PICK']);
     return [
-      'name' => strtoupper(fake()->bothify('?-##-?#')),
-      'type' => fake()->randomElement(['BULK', 'PICK']),
+      'name' => strtoupper(fake()->bothify($locationType . '-?#')),
+      'type' => $locationType,
       'section' => fake()->randomElement(['FAST', 'SLOW']),
     ];
   }

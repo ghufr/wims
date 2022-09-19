@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
+use App\Models\Inventory;
+use App\Models\Location;
 use App\Models\OutboundDelivery;
 use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\Warehouse;
 use App\Services\ProductService;
 use App\Services\Utils;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -74,11 +77,9 @@ class DeliveryOrderController extends Controller
     $order->destination()->associate($validated['destination']);
     $order->save();
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    ProductService::attachProducts($nProducts, $order);
 
-    $order->products()->attach($nProducts);
     $order->save();
 
     return Redirect::route('outbound.order.index');
@@ -115,11 +116,10 @@ class DeliveryOrderController extends Controller
     $order->origin()->associate($validated['origin']);
     $order->destination()->associate($validated['destination']);
 
-    $nProducts = $request->collect('products')->keyBy('id');
-    $products = Product::whereIn('id', $nProducts->keys())->get();
-    $nProducts = ProductService::transform($nProducts, $products);
+    $nProducts = $request->collect('products');
+    $order->products()->detach();
+    ProductService::attachProducts($nProducts, $order);
 
-    $order->products()->sync($nProducts);
     $order->save();
 
     return Redirect::route('outbound.order.index');
@@ -167,14 +167,12 @@ class DeliveryOrderController extends Controller
       $deliveryOrder->save();
 
       $products = $outbound->products->map->pivot;
-      $nProducts = $products->keyBy('product_id');
-      $nProducts->transform(function ($item, $key) {
-        return $item->only(['name', 'description', 'baseUom', 'price', 'quantity', 'amount']);
-      });
 
-      $deliveryOrder->products()->attach($nProducts->toArray());
+      foreach ($products as $product) {
+        $deliveryOrder->products()->attach($product->product_id, $product->only(['name', 'description', 'baseUom', 'price', 'quantity', 'amount']));
+      }
+
       $deliveryOrder->save();
-
 
       $outbound->status = 'CLOSE';
       $outbound->save();
@@ -184,13 +182,93 @@ class DeliveryOrderController extends Controller
 
     return Redirect::route('outbound.order.index');
   }
-  public function getPickingList()
+  public function getPickingList(Request $request)
   {
-    // TODO
+    $validated = $request->validate([
+      'deliveryOrderIds' => 'required|array'
+    ]);
+
+
+    $deliveryOrders = DeliveryOrder::with(['products', 'origin:id,name,description,address', 'destination:id,name,description,address', 'client:id,name'])->whereIn('id', $validated['deliveryOrderIds'])->get();
+    $result = collect([]);
+    foreach ($deliveryOrders as $deliveryOrder) {
+      $products = $deliveryOrder->products;
+      $productIds = $products->pluck('id');
+      $inventories = Inventory::with(['location:id,name'])->whereIn('product_id', $productIds)
+        ->where('client_id', $deliveryOrder->client_id)
+        ->where('warehouse_id', $deliveryOrder->origin_id)
+        // ->where('_id', $deliveryOrder->origin_id)
+        ->get();
+      $products = $products->map(function ($product) use ($inventories) {
+        $locations = $inventories->where('product_id', $product->id)->all();
+        return collect($product)->merge(['locations' => collect($locations)->values()]);
+      });
+
+      $result->push(collect($deliveryOrder)->merge(['products' => $products]));
+    }
+
+    // $deliveryOrdersByWarehouse = $deliveryOrders->groupBy(['origin_id', 'destination_id'])->map(function ($orderByWarehouse) {
+    //   return [
+    //     'origin' => $orderByWarehouse->get(0)->origin,
+    //     'orders' => $orderByWarehouse
+    //   ];
+    // })->values();
+    $productIds = $deliveryOrders->map->products;
+
+    return response()->json(['deliveryOrders' => $result, 'deliveryOrdersByWarehouse' => $result->groupBy('origin_id'), 'locations' => []]);
   }
-  public function toPicking()
+  public function toPicking(Request $request)
   {
     $this->authorize('create', DeliveryOrder::class);
-    //
+
+    $validated = $request->validate([
+      'inventories' => 'required|array',
+      'deliveryOrderIds' => 'required|array',
+    ]);
+
+    $inventories = $request->collect('inventories');
+
+    $deliveryOrders = DeliveryOrder::with(['products', 'origin:id,name,description', 'client:id,name', 'destination:id,name'])->whereIn('id', $validated['deliveryOrderIds'])->get();
+
+    foreach ($deliveryOrders as $deliveryOrder) {
+      $products = $deliveryOrder->products;
+      // $productIds = $products->pluck('id');
+
+      foreach ($products as $product) {
+        $location = $inventories->where('deliveryOrder', $deliveryOrder->id)->first();
+        // dd($deliveryOrder->id);
+        // if (!$location) continue;
+        $inventory = [
+          'product_id' => $product->id,
+          'warehouse_id' => $deliveryOrder->origin->id,
+          'location_id' => $location['location'],
+          'client_id' => $deliveryOrder->client->id
+        ];
+
+        $existingInventory = Inventory::where($inventory)->first();
+
+        if (is_null($existingInventory)) {
+          // Error
+          throw new Exception('No product stored');
+        } else {
+          // dd($existingInventory);
+          $nQuantity = $existingInventory->quantity - $product->pivot->quantity;
+
+          if ($nQuantity < 0) {
+            throw new Exception('Product quantity not enough');
+          }
+          // $oldAmount = $existingInventory->quantity * $existingInventory->avgPrice;
+          // $nAmount = $product->pivot->amount;
+          // $nAvgPrice = ($nAmount + $oldAmount) / $nQuantity;
+
+          $existingInventory->update([
+            'quantity' => $nQuantity,
+            // 'avgPrice' => $nAvgPrice,
+          ]);
+        }
+      }
+      $deliveryOrder->update(['status' => 'CLOSE']);
+    }
+    return Redirect::route('outbound.order.index');
   }
 }

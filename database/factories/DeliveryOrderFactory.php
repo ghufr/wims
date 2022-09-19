@@ -26,7 +26,7 @@ class DeliveryOrderFactory extends Factory
     // $reference = rand(0, 1) === 1 ? 'PICK-' . date_format($deliveryDate, 'Ymd') . fake()->numerify('##') : null;
 
     return [
-      'doNo' => fake()->ean13(),
+      'doNo' => fake()->ean8(),
       'outboundNo' => $outbound->outboundNo,
       // 'reference' => $reference,
       'status' => fake()->randomElement(['OPEN', 'CLOSE', 'PROCESS']),

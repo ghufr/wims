@@ -27,7 +27,7 @@ class InboundDelivery extends Model
 
   public function client()
   {
-    return $this->belongsTo(Customer::class, 'client_id', 'id');
+    return $this->belongsTo(Vendor::class, 'client_id', 'id');
   }
 
   public function products()

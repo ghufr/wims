@@ -104,8 +104,6 @@ const GoodsReceiptIndex = ({
 
   const { destroyMany } = useResource("inbound.receipt");
 
-  const handlePutaway = () => {};
-
   return (
     <div>
       <Modal
@@ -137,7 +135,13 @@ const GoodsReceiptIndex = ({
           <Typography id="modal-title" variant="h6" component="h2">
             Putaway List
           </Typography>
-          <PutawayForm data={{ goodsReceiptIds: selectedRows }} />
+          <PutawayForm
+            data={{ goodsReceiptIds: selectedRows }}
+            onFinish={() => {
+              setModal("");
+              setSelectedRows([]);
+            }}
+          />
         </Box>
       </Modal>
 
@@ -178,9 +182,7 @@ const GoodsReceiptIndex = ({
           columns={columns}
           rowsPerPageOptions={[25, 50, 100]}
           onSelectionModelChange={(rows) => setSelectedRows(rows)}
-          isRowSelectable={(params) =>
-            params.row.status == "OPEN" && !params.row.reference
-          }
+          isRowSelectable={(params) => params.row.status == "OPEN"}
           selectionModel={selectedRows}
           checkboxSelection
           density="compact"
